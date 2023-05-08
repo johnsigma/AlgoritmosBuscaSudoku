@@ -1,0 +1,31 @@
+package org.example;
+
+import java.io.IOException;
+
+// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
+// then press Enter. You can now see whitespace characters in your code.
+public class Main {
+    public static void main(String[] args) throws IOException, CloneNotSupportedException {
+        FileHandler fh = new FileHandler();
+        String path = "C:\\Users\\johnv\\IdeaProjects\\Trabalho1IA\\src\\main\\resources\\su2_test.txt";
+        Tuple tuple = fh.readFile(path);
+
+        String strTable = tuple.strTable;
+        int n = tuple.numberOfLines;
+
+        SudokuBoard su = new SudokuBoard(n);
+        su.populateBoardByTxtFile(strTable);
+        System.out.println("-----------Tabuleiro inicial------------");
+        su.printBoard();
+
+        //System.out.println(su.isSolution());
+
+        Search search = new Search();
+
+        SudokuBoard suResult = search.iterativeDepthSearch(100, su);
+
+        System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
+        suResult.printBoard();
+
+    }
+}
