@@ -6,7 +6,7 @@ import java.util.Random;
 public class SudokuBoard implements Cloneable {
     public int[][] board;
     public int size;
-    private int [] listOfN;
+    private int heuristicCost;
 
     public SudokuBoard(int size) {
         this.size = size;
@@ -17,15 +17,16 @@ public class SudokuBoard implements Cloneable {
 
         int auxIndex = 0;
 
-        for(int i = 0; i < this.size; i++) {
-            for(int j = 0; j < this.size; j++) {
-                while(true){
+        for (int i = 0; i < this.size; i++) {
+            for (int j = 0; j < this.size; j++) {
+                while (true) {
                     char c = str.charAt(auxIndex);
                     auxIndex += 1;
 
-                    if(!Character.isDigit(c))    continue;
+                    if (!Character.isDigit(c))
+                        continue;
 
-                    if(Character.getNumericValue(c) != 0)
+                    if (Character.getNumericValue(c) != 0)
                         this.board[i][j] = Character.getNumericValue(c);
 
                     break;
@@ -37,6 +38,45 @@ public class SudokuBoard implements Cloneable {
 
     }
 
+    public int getHeuristicCost() {
+        return this.heuristicCost;
+    }
+
+    public void setHeuristic() {
+        int emptyCells = 0;
+
+        for (int row = 0; row < this.size; row++) {
+            for (int col = 0; col < this.size; col++) {
+                if (this.board[row][col] == 0) {
+                    emptyCells += 1;
+                }
+            }
+        }
+
+        this.heuristicCost = emptyCells;
+    }
+
+    public void setHeuristicCost(int heuristicCost) {
+        this.heuristicCost = heuristicCost;
+    }
+
+    public int getPossibilitiesCount(int row, int col) {
+
+        if (this.board[row][col] != 0) {
+            return 0; // Retorna 0 para células preenchidas
+        }
+
+        int count = 0;
+
+        for (int num = 1; num <= this.size; num++) {
+            if (isValidMove(row, col, num)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
     public int getCell(int row, int col) {
         return this.board[row][col];
     }
@@ -44,13 +84,14 @@ public class SudokuBoard implements Cloneable {
     public void setCell(int row, int col, int value) {
         boolean isValidMove = this.isValidMove(row, col, value);
 
-        if(isValidMove){
-            //System.out.println("Valor " + value + " adicionado na célula [" + row + "][" + col + "].");
+        if (isValidMove) {
+            // System.out.println("Valor " + value + " adicionado na célula [" + row + "]["
+            // + col + "].");
             this.board[row][col] = value;
             return;
         }
 
-        //System.out.println("Este movimento não é válido.");
+        // System.out.println("Este movimento não é válido.");
     }
 
     public int[] drawNumberAndPosition() {
@@ -69,20 +110,20 @@ public class SudokuBoard implements Cloneable {
     public void populateBoard() {
         Random generator = new Random(1);
 
-        while(!this.isComplete()) {
+        while (!this.isComplete()) {
             int[] positionElement = this.drawNumberAndPosition();
             int value = positionElement[2];
             int row = positionElement[0];
             int col = positionElement[1];
 
-            if(this.board[row][col] != 0) continue;
+            if (this.board[row][col] != 0)
+                continue;
 
             this.setCell(row, col, value);
 
         }
 
     }
-
 
     public boolean isValidMove(int row, int col, int value) {
 
@@ -93,9 +134,11 @@ public class SudokuBoard implements Cloneable {
                 return false;
             }
 
-            if(this.size > 3) {
-                int subRow = (int) Math.sqrt(this.size) * (row / (int) Math.sqrt(this.size)) + i / (int) Math.sqrt(this.size);
-                int subCol = (int) Math.sqrt(this.size) * (col / (int) Math.sqrt(this.size)) + i % (int) Math.sqrt(this.size);
+            if (this.size > 3) {
+                int subRow = (int) Math.sqrt(this.size) * (row / (int) Math.sqrt(this.size))
+                        + i / (int) Math.sqrt(this.size);
+                int subCol = (int) Math.sqrt(this.size) * (col / (int) Math.sqrt(this.size))
+                        + i % (int) Math.sqrt(this.size);
                 if (this.board[subRow][subCol] == value) {
                     return false;
                 }
@@ -103,6 +146,7 @@ public class SudokuBoard implements Cloneable {
         }
         return true;
     }
+
     public void printBoard() {
         for (int row = 0; row < this.size; row++) {
             if (row % Math.sqrt(this.size) == 0 && row != 0) {
@@ -123,10 +167,10 @@ public class SudokuBoard implements Cloneable {
     }
 
     private int[] getNextEmptyCell() {
-        for(int i = 0; i < this.size; i++) {
-            for(int j = 0; j < this.size; j++) {
-                if(this.board[i][j] == 0) {
-                    int[] nextEmptyCell = {i, j};
+        for (int i = 0; i < this.size; i++) {
+            for (int j = 0; j < this.size; j++) {
+                if (this.board[i][j] == 0) {
+                    int[] nextEmptyCell = { i, j };
 
                     return nextEmptyCell;
                 }
@@ -137,22 +181,23 @@ public class SudokuBoard implements Cloneable {
     }
 
     public ArrayList<SudokuBoard> extendBoard() throws CloneNotSupportedException {
-        int [] nextEmptyCell = this.getNextEmptyCell();
+        int[] nextEmptyCell = this.getNextEmptyCell();
 
-        if(nextEmptyCell == null)   return null;
+        if (nextEmptyCell == null)
+            return null;
 
         int row = nextEmptyCell[0];
         int col = nextEmptyCell[1];
 
         ArrayList<SudokuBoard> newSus = new ArrayList<>();
 
-        for(int value = 1; value <= this.size; value++) {
-            if(this.isValidMove(row, col, value)) {
-                SudokuBoard newSu = (SudokuBoard)this.clone();
+        for (int value = 1; value <= this.size; value++) {
+            if (this.isValidMove(row, col, value)) {
+                SudokuBoard newSu = (SudokuBoard) this.clone();
                 newSu.board[row][col] = value;
-//                System.out.println("\n+++++++++++++");
-//                newSu.printBoard();
-//                System.out.println("+++++++++++++");
+                // System.out.println("\n+++++++++++++");
+                // newSu.printBoard();
+                // System.out.println("+++++++++++++");
                 newSus.add(newSu);
             }
         }
@@ -164,10 +209,10 @@ public class SudokuBoard implements Cloneable {
     public Object clone() throws CloneNotSupportedException {
         SudokuBoard cloned = (SudokuBoard) super.clone();
         cloned.size = this.size;
-        int [][] board = new int[cloned.size][cloned.size];
+        int[][] board = new int[cloned.size][cloned.size];
 
-        for(int i = 0; i < cloned.size; i++) {
-            for(int j = 0; j < cloned.size; j++) {
+        for (int i = 0; i < cloned.size; i++) {
+            for (int j = 0; j < cloned.size; j++) {
                 board[i][j] = this.board[i][j];
             }
         }
@@ -190,14 +235,11 @@ public class SudokuBoard implements Cloneable {
     }
 
     public boolean isSolution() {
-        for(int row = 0; row < this.size; row++) {
-            for(int col = 0; col < this.size; col++) {
+        for (int row = 0; row < this.size; row++) {
+            for (int col = 0; col < this.size; col++) {
                 int value = this.board[row][col];
                 this.board[row][col] = 0;
-                if(!this.isValidMove(row, col, value) || value == 0) {
-                    System.out.println("\nRow: " + row);
-                    System.out.println("Col: " + col);
-                    System.out.println("Value: " + value);
+                if (!this.isValidMove(row, col, value) || value == 0) {
                     return false;
                 }
 

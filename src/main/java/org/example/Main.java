@@ -7,7 +7,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException, CloneNotSupportedException {
         FileHandler fh = new FileHandler();
-        String path = "C:\\Users\\johnv\\IdeaProjects\\Trabalho1IA\\src\\main\\resources\\su2_test.txt";
+        String path = "C:\\Users\\johnv\\IdeaProjects\\Trabalho1IA\\src\\main\\resources\\su3.txt";
         Tuple tuple = fh.readFile(path);
 
         String strTable = tuple.strTable;
@@ -18,14 +18,22 @@ public class Main {
         System.out.println("-----------Tabuleiro inicial------------");
         su.printBoard();
 
-        //System.out.println(su.isSolution());
+        // System.out.println(su.isSolution());
 
         Search search = new Search();
 
-        SudokuBoard suResult = search.iterativeDepthSearch(100, su);
+        SudokuBoard suResult = null;
 
-        System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
-        suResult.printBoard();
+        System.out.println("\nGreedy 1:");
+        suResult = search.greedySearch(su);
+        System.out.println("\nGreedy 2:");
+        suResult = search.greedySearch2(su);
+        //suResult = search.iterativeDepthSearch(10000, su);
+        System.out.println("\nProfundidade:");
+        suResult = search.depthLimitedSearch(10000, su);
+
+//        System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
+//        suResult.printBoard();
 
     }
 }
