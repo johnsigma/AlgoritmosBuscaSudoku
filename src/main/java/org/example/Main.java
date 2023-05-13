@@ -31,17 +31,24 @@ public class Main {
 
         Search search = new Search();
 
-        SudokuBoard suResult = null;
+        SudokuBoard suResult;
 
-        System.out.println("\nGreedy 1:");
+        long start = System.currentTimeMillis();
+
+        //System.out.println("\nGreedy 1:");
         suResult = search.greedySearch(sudokuBoard);
-        System.out.println("\nGreedy 2:");
+        //System.out.println("\nGreedy 2:");
         suResult = search.greedySearch2(sudokuBoard);
         //suResult = search.iterativeDepthSearch(10000, su);
-        System.out.println("\nProfundidade:");
+        System.out.println("\nBusca Profundidade Iterativa:");
         //suResult = search.depthLimitedSearch(10000, sudokuBoard);
         suResult = search.iterativeDepthSearch(10000, sudokuBoard);
 
+        long finish = System.currentTimeMillis();
+
+        long timeElapsed = finish - start;
+
+        System.out.println("\nTempo execução: "+ timeElapsed/ 1000d);
         //System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
         suResult.printBoard();
 
