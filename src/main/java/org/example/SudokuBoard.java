@@ -113,33 +113,38 @@ public class SudokuBoard implements Cloneable {
     }
 
     private boolean isNumberInSubGrid(int row, int col, int value, int i) {
-        if (this.size > 3) {
-            int subRow = (int) Math.sqrt(this.size) * (row / (int) Math.sqrt(this.size))
-                    + i / (int) Math.sqrt(this.size);
-            int subCol = (int) Math.sqrt(this.size) * (col / (int) Math.sqrt(this.size))
-                    + i % (int) Math.sqrt(this.size);
-            return this.board[subRow][subCol] == value;
-        }
-        return false;
+        int subRow = (int) Math.sqrt(this.size) * (row / (int) Math.sqrt(this.size))
+                + i / (int) Math.sqrt(this.size);
+        int subCol = (int) Math.sqrt(this.size) * (col / (int) Math.sqrt(this.size))
+                + i % (int) Math.sqrt(this.size);
+        return this.board[subRow][subCol] == value;
     }
 
     public void printBoard() {
+
+        String divisionBar = "-".repeat((int) (this.size * 2.8));
+
+        System.out.print("\n"+divisionBar+"\n");
+
         for (int row = 0; row < this.size; row++) {
             if (row % Math.sqrt(this.size) == 0 && row != 0) {
-                System.out.print("+");
-                for (int i = 0; i < this.size; i++) {
-                    System.out.print("-");
-                }
-                System.out.println("+");
+                System.out.print(divisionBar+"\n");
             }
             for (int col = 0; col < this.size; col++) {
                 if (col % Math.sqrt(this.size) == 0 && col != 0) {
                     System.out.print("| ");
                 }
-                System.out.print(this.board[row][col] + " ");
+                if(col == 0) {
+                    System.out.print("| "+this.board[row][col] + " ");
+                } else if (col == this.size - 1) {
+                    System.out.print(this.board[row][col] + " |");
+                } else {
+                    System.out.print(this.board[row][col] + " ");
+                }
             }
             System.out.println();
         }
+        System.out.print(divisionBar+"\n");
     }
 
     private int[] getNextEmptyCell() {
