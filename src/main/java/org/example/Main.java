@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, CloneNotSupportedException {
 
-        String fileName = "su2_test.txt";
+        String fileName = "su2.txt";
 
         ClassLoader classLoader = Main.class.getClassLoader();
 
@@ -39,7 +39,8 @@ public class Main {
         suResult = search.greedySearch2(sudokuBoard);
         //suResult = search.iterativeDepthSearch(10000, su);
         System.out.println("\nProfundidade:");
-        suResult = search.depthLimitedSearch(10000, sudokuBoard);
+        //suResult = search.depthLimitedSearch(10000, sudokuBoard);
+        suResult = search.iterativeDepthSearch(10000, sudokuBoard);
 
         //System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
         suResult.printBoard();

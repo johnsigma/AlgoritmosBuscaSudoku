@@ -88,16 +88,18 @@ public class SudokuBoard implements Cloneable {
         // Verifica se o valor já existe na linha, coluna ou subgrid
         for (int i = 0; i < this.size; i++) {
 
-            if (isNumberInRow(row, value, i) || isNumberInColumn(col, value, i)) {
-                return false;
-            }
-
-            if(isComplexBoard()) {
-                if (isNumberInSubGrid(row, col, value, i)) return false;
-            }
+            if (isInvalidPlacement(row, col, value, i)) return false;
 
         }
         return true;
+    }
+
+    private boolean isInvalidPlacement(int row, int col, int value, int i) {
+        if(isComplexBoard()) {
+            return isNumberInRow(row, value, i) || isNumberInColumn(col, value, i) || isNumberInSubGrid(row, col, value, i);
+        } else {
+            return isNumberInRow(row, value, i) || isNumberInColumn(col, value, i);
+        }
     }
 
     private boolean isComplexBoard() {
