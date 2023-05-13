@@ -27,12 +27,6 @@ public class Search {
 
             result = this.depthLimitedSearch(depth, su);
 
-            // System.out.println("\n----------");
-            // result.printBoard();
-            // System.out.println("----------");
-
-            // System.out.println(depth);
-
             if (result.isSolution()) {
                 System.out.println("Solução encontrada com profundidade " + depth);
                 return result;
@@ -44,11 +38,9 @@ public class Search {
     }
 
     public void setHeuristics(ArrayList<SudokuBoard> sus) {
-
-        for (int i = 0; i < sus.size(); i++) {
-            sus.get(i).setHeuristic();
+        for (SudokuBoard sudokuBoard : sus) {
+            sudokuBoard.setHeuristic();
         }
-
     }
 
     public void setHeuristics2(ArrayList<SudokuBoard> sus) {
@@ -230,9 +222,9 @@ public class Search {
 
                 Collections.sort(new_sus, Comparator.comparing(SudokuBoard::getHeuristicCost));
 
-                for (int i = 0; i < new_sus.size(); i++) {
-                    if (!stack.contains(new_sus.get(i)) && !checkedSus.contains(new_sus.get(i))) {
-                        this.addInOrderToList(stack, new_sus.get(i));
+                for (SudokuBoard newSus : new_sus) {
+                    if (!stack.contains(newSus) && !checkedSus.contains(newSus)) {
+                        this.addInOrderToList(stack, newSus);
                     }
                 }
             }
@@ -244,18 +236,15 @@ public class Search {
 
     public SudokuBoard depthLimitedSearch(int depth, SudokuBoard su) throws CloneNotSupportedException {
 
-        SudokuBoard selected_su = null;
+        SudokuBoard selectedSudokuBoard = null;
 
         int numberOfSteps = 0;
-
-        // Stack<Cell> stack = new Stack<>();
-        // stack.push(new Cell(0,0));
 
         Stack<SudokuBoard> stack = new Stack<>();
         stack.push(su);
 
-        ArrayList<SudokuBoard> checkedSus = new ArrayList<>();
-        ArrayList<SudokuBoard> exploredSus = new ArrayList<>();
+        ArrayList<SudokuBoard> visitedSudokuBoardNode = new ArrayList<>();
+        ArrayList<SudokuBoard> exploredSudokuBoardNodes = new ArrayList<>();
 
         while (numberOfSteps < depth) {
 
@@ -266,145 +255,36 @@ public class Search {
                 break;
             }
 
-            selected_su = stack.pop();
+            selectedSudokuBoard = stack.pop();
 
-            checkedSus.add(selected_su);
+            visitedSudokuBoardNode.add(selectedSudokuBoard);
 
-            if (selected_su.isSolution()) {
+            if (selectedSudokuBoard.isSolution()) {
                 System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
-                        + exploredSus.size() + " nós.");
-                // for (SudokuBoard suAux : exploredSus) {
-                // suAux.printBoard();
-                // System.out.println("\n");
-                // }
-                return selected_su;
+                        + exploredSudokuBoardNodes.size() + " nós.");
+                return selectedSudokuBoard;
             }
 
-            ArrayList<SudokuBoard> new_sus = selected_su.extendBoard();
+            ArrayList<SudokuBoard> newSudokuBoardNodesExtendedFromActualNode = selectedSudokuBoard.extendBoard();
 
-            if (new_sus == null)
+            if (newSudokuBoardNodesExtendedFromActualNode == null)
                 continue;
 
-            if (new_sus.size() > 0) {
-                exploredSus.add(selected_su);
-                for (int i = new_sus.size() - 1; i >= 0; i--) {
-
-                    // System.out.println("\nStack");
-                    // for(int n = 0; n < stack.size(); n++) {
-                    // stack.get(n).printBoard();
-                    // }
-                    //
-                    // System.out.println("\nChecked");
-                    // for(int n = 0; n < checkedSus.size(); n++) {
-                    // checkedSus.get(n).printBoard();
-                    // }
-
-                    // ArrayList<SudokuBoard> arrayStack = new ArrayList(stack);
-                    //
-                    // if(!this.boardIsContainedInList(new_sus.get(i).board, arrayStack) &&
-                    // !this.boardIsContainedInList(new_sus.get(i).board, checkedSus)) {
-                    // System.out.println("\n\n+++++++++++++");
-                    // new_sus.get(i).printBoard();
-                    // System.out.println("\n+++++++++++++");
-                    // stack.push(new_sus.get(i));
-                    // }
-
-                    if (!stack.contains(new_sus.get(i)) && !checkedSus.contains(new_sus.get(i))) {
-                        stack.push(new_sus.get(i));
-                    }
-                }
-            }
-
-            // Cell cell = stack.pop();
-            // int row = cell.row;
-            // int col = cell.col;
-            //
-            // if(su.board[row][col] == 0) {
-            //
-            // for(int value = previousSu.board[row][col] + 1; value <= su.size; value++) {
-            // if(su.isValidMove(row, col, value)) {
-            // su.board[row][col] = value;
-            //
-            // if(depth == 1 || su.isComplete()) {
-            // //return true;
-            // } else {
-            // Cell nextCell = this.getNextEmptyCell(row, col, su.board, su.size);
-            // stack.push(nextCell);
-            // break;
-            // }
-            // }
-            // }
-            // } else {
-            // Cell nextCell = this.getNextEmptyCell(row, col, su.board, su.size);
-            // stack.push(nextCell);
-            // }
+            addExpandedNodesThatWasNotVisitedIntoStack(selectedSudokuBoard, stack, visitedSudokuBoardNode, exploredSudokuBoardNodes, newSudokuBoardNodesExtendedFromActualNode);
         }
 
-        return selected_su;
+        return selectedSudokuBoard;
 
     }
 
-    private boolean boardIsContainedInList(int[][] board, ArrayList<SudokuBoard> boardsList) {
-        for (int c = 0; c < boardsList.size(); c++) {
-            if (Arrays.equals(board, boardsList.get(c).board)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private Cell getNextEmptyCell(int row, int col, int[][] board, int size) {
-        for (int i = row; i < size; i++) {
-            for (int j = (i == row) ? col + 1 : 0; j < size; j++) {
-                if (board[i][j] == 0) {
-                    Cell nextCell = new Cell(i, j);
-                    return nextCell;
+    private static void addExpandedNodesThatWasNotVisitedIntoStack(SudokuBoard selectedSudokuBoard, Stack<SudokuBoard> stack, ArrayList<SudokuBoard> visitedSudokuBoardNode, ArrayList<SudokuBoard> exploredSudokuBoardNodes, ArrayList<SudokuBoard> newSudokuBoardNodesExtendedFromActualNode) {
+        if (newSudokuBoardNodesExtendedFromActualNode.size() > 0) {
+            exploredSudokuBoardNodes.add(selectedSudokuBoard);
+            for (int i = newSudokuBoardNodesExtendedFromActualNode.size() - 1; i >= 0; i--) {
+                if (!stack.contains(newSudokuBoardNodesExtendedFromActualNode.get(i)) && !visitedSudokuBoardNode.contains(newSudokuBoardNodesExtendedFromActualNode.get(i))) {
+                    stack.push(newSudokuBoardNodesExtendedFromActualNode.get(i));
                 }
             }
         }
-
-        return null;
     }
-
-    // public void IterativeDepthSearch(int limit, SudokuBoard board) {
-    //
-    // boolean solutionFound = false;
-    //
-    // for(int n = 0; n < limit; n++) {
-    //
-    // if(solutionFound) break;
-    //
-    // while(true) {
-    // this.numberOfSteps += 1;
-    //
-    // if(this.frontierIsEmpty()) {
-    // System.out.println("No solution found after " + this.numberOfSteps + "
-    // steps.");
-    // break;
-    // }
-    //
-    // Node selectedNode = this.removeFromFrontier();
-    //
-    // if(selectedNode.isTheSolution()) {
-    // System.out.println("Solution found after " + this.numberOfSteps + " steps.");
-    // System.out.println(selectedNode);
-    // solutionFound = true;
-    // break;
-    // }
-    //
-    // newNodes = selectedNode.extendNode();
-    //
-    // if(newNodes.length > 0) {
-    // for(int i = 0; i < newNodes.length; i++) {
-    // if(!this.frontier.contains(newNodes[i]) &&
-    // !this.checkedNodes.contains(newNodes[i])) {
-    // this.insertToFrontier(newNodes[i]);
-    // }
-    // }
-    // }
-    //
-    // }
-    // }
-    // }
 }
