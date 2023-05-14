@@ -5,7 +5,7 @@ import java.util.*;
 public class Search {
 
     private static final int MAX_MOVES = 10000;
-    private static final double INITIAL_TEMPERATURE = 100.0;
+    private static final double INITIAL_TEMPERATURE = 1.0;
     private static final double COOLING_FACTOR = 0.95;
     private static final double FINAL_TEMPERATURE = 0.0001;
 
@@ -295,7 +295,7 @@ public class Search {
 
         while (temperature > FINAL_TEMPERATURE) {
             for (int i = 0; i < MAX_MOVES; i++) {
-                int[][] newBoard = sudokuBoard.perturb();
+                int[][] newBoard = sudokuBoard.perturbBoard();
                 int newCost = sudokuBoard.calculateCost(newBoard);
                 if (sudokuBoard.acceptPerturbedSolution(newCost, currentCost, temperature)) {
                     sudokuBoard.board = newBoard;

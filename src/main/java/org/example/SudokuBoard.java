@@ -125,7 +125,9 @@ public class SudokuBoard implements Cloneable {
 
     public void printBoard() {
 
-        String divisionBar = "-".repeat((int) (this.size * 2.8));
+        double repeatFactor = (this.size > 4 ? 2.8 : 3.3);
+
+        String divisionBar = "-".repeat((int) (this.size * repeatFactor));
 
         System.out.print("\n"+divisionBar+"\n");
 
@@ -233,13 +235,13 @@ public class SudokuBoard implements Cloneable {
 
     private int getCostOfRepeatedNumbersInSubGrid(int[][] board,int cost) {
         int boardSize = board.length;
-        int REGION_SIZE = 3;
+        int regionSize = boardSize == 9 ? 3 : 2;
 
-        for (int i = 0; i < boardSize; i += REGION_SIZE) {
-            for (int j = 0; j < boardSize; j += REGION_SIZE) {
+        for (int i = 0; i < boardSize; i += regionSize) {
+            for (int j = 0; j < boardSize; j += regionSize) {
                 int[] counts = new int[boardSize + 1];
-                for (int k = 0; k < REGION_SIZE; k++) {
-                    for (int l = 0; l < REGION_SIZE; l++) {
+                for (int k = 0; k < regionSize; k++) {
+                    for (int l = 0; l < regionSize; l++) {
                         counts[board[i + k][j + l]]++;
                     }
                 }
@@ -269,8 +271,8 @@ public class SudokuBoard implements Cloneable {
         int boardSize = board.length;
         for (int j = 0; j < boardSize; j++) {
             int[] counts = new int[boardSize + 1];
-            for (int i = 0; i < boardSize; i++) {
-                counts[board[i][j]]++;
+            for (int[] ints : board) {
+                counts[ints[j]]++;
             }
             for (int i = 1; i <= boardSize; i++) {
                 cost += counts[i] > 1 ? counts[i] - 1 : 0;
@@ -279,10 +281,9 @@ public class SudokuBoard implements Cloneable {
         return cost;
     }
 
-    public int[][] perturb() {
+    public int[][] perturbBoard() {
         Random random = new Random();
 
-        // Fazer uma perturbação na solução
         int boardSize = board.length;
         int[][] newBoard = new int[boardSize][boardSize];
         copyBoard(this.board, newBoard);
@@ -308,6 +309,30 @@ public class SudokuBoard implements Cloneable {
     private static void copyBoard(int[][] source, int[][] dest) {
         for (int i = 0; i < source.length; i++) {
             System.arraycopy(source[i], 0, dest[i], 0, source.length);
+        }
+    }
+
+    public void initializeBoard() {
+        int boardSize = this.size;
+
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                board[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                int value = 0;
+                int attempts = 0;
+
+                Random random = new Random();
+                value = random.nextInt(boardSize) + 1;
+
+                if (isValidMove(i, j, value)) {
+                    board[i][j] = value;
+                }
+            }
         }
     }
 }
