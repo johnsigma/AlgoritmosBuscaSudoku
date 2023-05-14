@@ -1,14 +1,14 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Stack;
+import java.util.*;
 
 public class Search {
 
-    int numberOfSteps = 0;
+    private static final int SUBSECTION_SIZE = 3;
+    private static final int MAX_MOVES = 10000;
+    private static final double INITIAL_TEMPERATURE = 100.0;
+    private static final double COOLING_FACTOR = 0.95;
+    private static final double FINAL_TEMPERATURE = 0.0001;
 
     Search() {
 
@@ -287,4 +287,28 @@ public class Search {
             }
         }
     }
+
+
+    public SudokuBoard simulatedAnnealing(SudokuBoard sudokuBoard) {
+        int currentCost = sudokuBoard.calculateCost(sudokuBoard.board);
+        int bestCost = currentCost;
+        double temperature = INITIAL_TEMPERATURE;
+
+        while (temperature > FINAL_TEMPERATURE) {
+            for (int i = 0; i < MAX_MOVES; i++) {
+                int[][] newBoard = sudokuBoard.perturb();
+                int newCost = sudokuBoard.calculateCost(newBoard);
+                if (sudokuBoard.acceptPerturbedSolution(newCost, currentCost, temperature)) {
+                    sudokuBoard.board = newBoard;
+                    currentCost = newCost;
+                    if (currentCost < bestCost) {
+                        bestCost = currentCost;
+                    }
+                }
+            }
+            temperature *= COOLING_FACTOR;
+        }
+        return sudokuBoard;
+    }
+
 }
