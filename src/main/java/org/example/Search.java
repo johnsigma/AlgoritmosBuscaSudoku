@@ -4,7 +4,6 @@ import java.util.*;
 
 public class Search {
 
-    private static final int SUBSECTION_SIZE = 3;
     private static final int MAX_MOVES = 10000;
     private static final double INITIAL_TEMPERATURE = 100.0;
     private static final double COOLING_FACTOR = 0.95;
