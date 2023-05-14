@@ -19,7 +19,7 @@ public class Main {
         String strTable = tuple.strTable;
         int n = tuple.numberOfLines;
 
-        Type sudokuBoardType = Type.COMPLEX;
+        Type sudokuBoardType = Type.SIMPLE;
 
         SudokuBoard sudokuBoard = new SudokuBoard(n, sudokuBoardType);
         sudokuBoard.populateBoardByTxtFile(strTable);
@@ -36,19 +36,21 @@ public class Main {
         long start = System.currentTimeMillis();
 
         //System.out.println("\nGreedy 1:");
-        suResult = search.greedySearch(sudokuBoard);
+        //suResult = search.greedySearch(sudokuBoard);
         //System.out.println("\nGreedy 2:");
-        suResult = search.greedySearch2(sudokuBoard);
+        //suResult = search.greedySearch2(sudokuBoard);
         //suResult = search.iterativeDepthSearch(10000, su);
-        System.out.println("\nBusca Profundidade Iterativa:");
+        //System.out.println("\nBusca Profundidade Iterativa:");
         //suResult = search.depthLimitedSearch(10000, sudokuBoard);
-        suResult = search.iterativeDepthSearch(10000, sudokuBoard);
+        //suResult = search.iterativeDepthSearch(100000, sudokuBoard);
+        System.out.println("\nTempera simulada: ");
+        suResult = search.simulatedAnnealing(sudokuBoard);
 
         long finish = System.currentTimeMillis();
 
         long timeElapsed = finish - start;
 
-        System.out.println("\nTempo execução: "+ timeElapsed/ 1000d);
+        System.out.println("\nTempo execução: "+ (timeElapsed/ 1000d) +" segundos");
         //System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
         suResult.printBoard();
 

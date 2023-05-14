@@ -1,6 +1,7 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class SudokuBoard implements Cloneable {
     public int[][] board;
@@ -213,5 +214,100 @@ public class SudokuBoard implements Cloneable {
         }
 
         return true;
+    }
+
+    public int calculateCost(int[][] board) {
+        int cost = 0;
+
+        cost = getCostOfRepeatedNumbersInRow(board, cost);
+
+        cost = getCostOfRepeatedNumbersInColumn(board, cost);
+        
+        if(isComplexBoard()) {
+            cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
+            
+        }
+        
+        return cost;
+    }
+
+    private int getCostOfRepeatedNumbersInSubGrid(int[][] board,int cost) {
+        int boardSize = board.length;
+        int REGION_SIZE = 3;
+
+        for (int i = 0; i < boardSize; i += REGION_SIZE) {
+            for (int j = 0; j < boardSize; j += REGION_SIZE) {
+                int[] counts = new int[boardSize + 1];
+                for (int k = 0; k < REGION_SIZE; k++) {
+                    for (int l = 0; l < REGION_SIZE; l++) {
+                        counts[board[i + k][j + l]]++;
+                    }
+                }
+                for (int k = 1; k <= boardSize; k++) {
+                    cost += counts[k] > 1 ? counts[k] - 1 : 0;
+                }
+            }
+        }
+        return cost;
+    }
+
+    private int getCostOfRepeatedNumbersInRow(int[][] board, int cost) {
+        int length = board.length;
+        for (int[] ints : board) {
+            int[] counts = new int[length + 1];
+            for (int j = 0; j < length; j++) {
+                counts[ints[j]]++;
+            }
+            for (int j = 1; j <= length; j++) {
+                cost += counts[j] > 1 ? counts[j] - 1 : 0;
+            }
+        }
+        return cost;
+    }
+
+    private int getCostOfRepeatedNumbersInColumn(int[][] board, int cost) {
+        int boardSize = board.length;
+        for (int j = 0; j < boardSize; j++) {
+            int[] counts = new int[boardSize + 1];
+            for (int i = 0; i < boardSize; i++) {
+                counts[board[i][j]]++;
+            }
+            for (int i = 1; i <= boardSize; i++) {
+                cost += counts[i] > 1 ? counts[i] - 1 : 0;
+            }
+        }
+        return cost;
+    }
+
+    public int[][] perturb() {
+        Random random = new Random();
+
+        // Fazer uma perturbação na solução
+        int boardSize = board.length;
+        int[][] newBoard = new int[boardSize][boardSize];
+        copyBoard(this.board, newBoard);
+
+        int row = random.nextInt(boardSize);
+        int col = random.nextInt(boardSize);
+        int value = random.nextInt(boardSize) + 1;
+        newBoard[row][col] = value;
+
+        return newBoard;
+    }
+
+    public boolean acceptPerturbedSolution(int newCost, int oldCost, double temperature) {
+        Random random = new Random();
+
+        if (newCost < oldCost) {
+            return true;
+        }
+        double probability = Math.exp(-(newCost - oldCost) / temperature);
+        return random.nextDouble() < probability;
+    }
+
+    private static void copyBoard(int[][] source, int[][] dest) {
+        for (int i = 0; i < source.length; i++) {
+            System.arraycopy(source[i], 0, dest[i], 0, source.length);
+        }
     }
 }
