@@ -289,14 +289,14 @@ public class Search {
 
 
     public SudokuBoard simulatedAnnealing(SudokuBoard sudokuBoard) {
-        int currentCost = sudokuBoard.calculateCost(sudokuBoard.board);
+        int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(sudokuBoard.board);
         int bestCost = currentCost;
         double temperature = INITIAL_TEMPERATURE;
 
         while (temperature > FINAL_TEMPERATURE) {
             for (int i = 0; i < MAX_MOVES; i++) {
                 int[][] newBoard = sudokuBoard.perturbBoard();
-                int newCost = sudokuBoard.calculateCost(newBoard);
+                int newCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(newBoard);
                 if (sudokuBoard.acceptPerturbedSolution(newCost, currentCost, temperature)) {
                     sudokuBoard.board = newBoard;
                     currentCost = newCost;
@@ -306,6 +306,78 @@ public class Search {
                 }
             }
             temperature *= COOLING_FACTOR;
+        }
+        return sudokuBoard;
+    }
+
+    private static final int MAX_ITERATIONS = 10000;
+    public SudokuBoard hillClimbing(SudokuBoard sudokuBoard) {
+        //putIntoEmptyCellsRandomNumbers(board);
+        Random rand = new Random();
+        int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(sudokuBoard.board);
+        int bestCost = currentCost;
+        int quantidadeTentativasMovimentosLaterais = 0;
+        int MAX_MOVES_WITHOUT_IMPROVEMENT = 100;
+        boolean foundBetter = false;
+        int maxIterations = 0;
+
+        int row = 0, column = 0;
+
+        while (!sudokuBoard.isSolution() || maxIterations < MAX_ITERATIONS) {
+
+            for (int i = 0; i < sudokuBoard.board.length; i++) {
+                for (int j = 0; j < sudokuBoard.board.length; j++) {
+                    if(sudokuBoard.board[i][j] == 0 ) {
+                        row = i;
+                        column = j;
+                        foundBetter = false;
+                        SudokuBoard newPositionToTry = new SudokuBoard(sudokuBoard.board.length, sudokuBoard.getSudokuBoardType());
+                        newPositionToTry.board = sudokuBoard.board;
+                        newPositionToTry.size = sudokuBoard.size;
+                        ModifiedBoard modifiedBoard = newPositionToTry.perturbBoardForHillClimbing(row, column);
+
+                        int custoVizinho = newPositionToTry.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(modifiedBoard.newBoard);
+                        int custoBoardOriginal = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+                        if (custoVizinho < custoBoardOriginal) {
+                            sudokuBoard.board = modifiedBoard.newBoard;
+                            custoBoardOriginal = custoVizinho;
+                            foundBetter = true;
+                        }
+                    }
+
+
+                    if(!foundBetter) {
+                        int newScore = -1;
+                        while (true)  {
+                            SudokuBoard newBoardCopied = new SudokuBoard(sudokuBoard.board.length, sudokuBoard.getSudokuBoardType());
+                            newBoardCopied.board = sudokuBoard.board;
+                            newBoardCopied.size = sudokuBoard.size;
+
+                            ModifiedBoard modifiedBoard = newBoardCopied.perturbBoardForHillClimbing(row, column);
+
+                            int custoVizinho = newBoardCopied.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(modifiedBoard.newBoard);
+                            int custoBoardOriginal = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+                            quantidadeTentativasMovimentosLaterais++;
+                            if (custoVizinho < custoBoardOriginal) {
+                                custoBoardOriginal = custoVizinho;
+                                sudokuBoard.board = newBoardCopied.board;
+                                quantidadeTentativasMovimentosLaterais = 0;
+                                break;
+                            }
+
+                            if(quantidadeTentativasMovimentosLaterais >= MAX_MOVES_WITHOUT_IMPROVEMENT) {
+
+                                quantidadeTentativasMovimentosLaterais = 0;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            maxIterations++;
         }
         return sudokuBoard;
     }

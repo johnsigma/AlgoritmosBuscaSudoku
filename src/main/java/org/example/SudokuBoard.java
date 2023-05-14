@@ -218,7 +218,7 @@ public class SudokuBoard implements Cloneable {
         return true;
     }
 
-    public int calculateCost(int[][] board) {
+    public int calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(int[][] board) {
         int cost = 0;
 
         cost = getCostOfRepeatedNumbersInRow(board, cost);
@@ -230,6 +230,22 @@ public class SudokuBoard implements Cloneable {
             
         }
         
+        return cost;
+    }
+
+    public int calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(int[][] board) {
+        int cost = 0;
+
+        cost = getCostOfRepeatedNumbersInRow(board, cost);
+
+        cost = getCostOfRepeatedNumbersInColumn(board, cost);
+
+        cost = getCostOfEmptyCells(board, cost);
+
+        if(isComplexBoard()) {
+            cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
+        }
+
         return cost;
     }
 
@@ -281,6 +297,18 @@ public class SudokuBoard implements Cloneable {
         return cost;
     }
 
+    private int getCostOfEmptyCells(int[][] board, int cost) {
+        int boardSize = board.length;
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if(board[i][j] == 0) {
+                    cost += 1;
+                }
+            }
+        }
+        return cost;
+    }
+
     public int[][] perturbBoard() {
         Random random = new Random();
 
@@ -294,6 +322,29 @@ public class SudokuBoard implements Cloneable {
         newBoard[row][col] = value;
 
         return newBoard;
+    }
+
+    public ModifiedBoard perturbBoardForHillClimbing(int row, int column) {
+        Random random = new Random();
+
+        int boardSize = board.length;
+        int[][] newBoard = new int[boardSize][boardSize];
+        copyBoard(this.board, newBoard);
+
+        int value = random.nextInt(boardSize) + 1;
+
+        ModifiedBoard modifiedBoard = new ModifiedBoard(newBoard, row, column, newBoard[row][column], value);
+
+        int originalCost = calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(board);
+        newBoard[row][column] = value;
+        int newCost = calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
+
+        if(isValidMove(row, column, value) && newCost < originalCost) {
+            modifiedBoard.newBoard = newBoard;
+            return modifiedBoard;
+        }
+
+        return modifiedBoard;
     }
 
     public boolean acceptPerturbedSolution(int newCost, int oldCost, double temperature) {
@@ -323,8 +374,7 @@ public class SudokuBoard implements Cloneable {
 
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
-                int value = 0;
-                int attempts = 0;
+                int value;
 
                 Random random = new Random();
                 value = random.nextInt(boardSize) + 1;
@@ -335,4 +385,21 @@ public class SudokuBoard implements Cloneable {
             }
         }
     }
+
+    public SudokuBoard initializeBoardRandomWay() {
+        int boardSize = this.size;
+
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                int value;
+
+                Random random = new Random();
+                value = random.nextInt(boardSize) + 1;
+
+                board[i][j] = value;
+            }
+        }
+        return this;
+    }
+
 }
