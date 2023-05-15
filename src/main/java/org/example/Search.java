@@ -4,11 +4,12 @@ import java.util.*;
 
 public class Search {
 
-    private static final int MAX_MOVES = 10000;
-    private static final double INITIAL_TEMPERATURE = 1.0;
-    private static final double COOLING_FACTOR = 0.95;
-    private static final double FINAL_TEMPERATURE = 0.0001;
+    private static final int SIMULATED_ANNEALING_MAX_MOVES = 10000;
+    private static final double SIMULATED_ANNEALING_INITIAL_TEMPERATURE = 1.0;
+    private static final double SIMULATED_ANNEALING_COOLING_FACTOR = 0.95;
+    private static final double SIMULATED_ANNEALING_FINAL_TEMPERATURE = 0.0001;
     private static final int HILL_CLIMBING_MAX_ITERATIONS = 100000;
+    private static final int MAX_MOVES_WITHOUT_IMPROVEMENT = 1000;
 
     Search() {
 
@@ -292,10 +293,10 @@ public class Search {
     public SudokuBoard simulatedAnnealing(SudokuBoard sudokuBoard) {
         int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(sudokuBoard.board);
         int bestCost = currentCost;
-        double temperature = INITIAL_TEMPERATURE;
+        double temperature = SIMULATED_ANNEALING_INITIAL_TEMPERATURE;
 
-        while (temperature > FINAL_TEMPERATURE) {
-            for (int i = 0; i < MAX_MOVES; i++) {
+        while (temperature > SIMULATED_ANNEALING_FINAL_TEMPERATURE) {
+            for (int i = 0; i < SIMULATED_ANNEALING_MAX_MOVES; i++) {
                 int[][] newBoard = sudokuBoard.perturbBoard();
                 int newCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(newBoard);
                 if (sudokuBoard.acceptPerturbedSolution(newCost, currentCost, temperature)) {
@@ -306,14 +307,13 @@ public class Search {
                     }
                 }
             }
-            temperature *= COOLING_FACTOR;
+            temperature *= SIMULATED_ANNEALING_COOLING_FACTOR;
         }
         return sudokuBoard;
     }
 
     public SudokuBoard hillClimbingWithLateralMoves(SudokuBoard sudokuBoard) {
         int quantityOfLateralMoves = 0;
-        int MAX_MOVES_WITHOUT_IMPROVEMENT = 1000;
         boolean foundBetterCostBoard;
         int maxIterations = 0;
 
