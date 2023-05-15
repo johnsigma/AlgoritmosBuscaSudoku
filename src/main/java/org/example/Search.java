@@ -17,27 +17,28 @@ public class Search {
 
     }
 
-    public SudokuBoard iterativeDepthSearch(int limit, SudokuBoard su) throws CloneNotSupportedException {
+    public SudokuResponse iterativeDepthSearch(int limit, SudokuBoard su) throws CloneNotSupportedException {
+        SudokuResponse sudokuResponse = new SudokuResponse();
+        List<SudokuBoard> steps = new ArrayList<>();
+        steps.add(su);
+        sudokuResponse.setSteps(steps);
 
         if (su.isSolution())
-            return su;
-
-        SudokuBoard result = null;
+            return sudokuResponse;
 
         for (int depth = 1; depth <= limit; depth++) {
 
             System.out.println("\nIteração: " + depth);
 
-            result = this.depthLimitedSearch(depth, su);
+            sudokuResponse = this.depthLimitedSearch(depth, su, sudokuResponse);
 
-            if (result.isSolution()) {
+            if (sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).isSolution()) {
                 System.out.println("Solução encontrada com profundidade " + depth);
-                return result;
+                break;
             }
-
         }
 
-        return result;
+        return sudokuResponse;
     }
 
     public void setHeuristics(ArrayList<SudokuBoard> sus) {
@@ -237,7 +238,7 @@ public class Search {
 
     }
 
-    public SudokuBoard depthLimitedSearch(int depth, SudokuBoard su) throws CloneNotSupportedException {
+    public SudokuResponse depthLimitedSearch(int depth, SudokuBoard su, SudokuResponse sudokuResponse) throws CloneNotSupportedException {
 
         SudokuBoard selectedSudokuBoard = null;
 
@@ -265,7 +266,8 @@ public class Search {
             if (selectedSudokuBoard.isSolution()) {
                 System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
                         + exploredSudokuBoardNodes.size() + " nós.");
-                return selectedSudokuBoard;
+                sudokuResponse.setDepth(String.valueOf(numberOfSteps));
+                break;
             }
 
             ArrayList<SudokuBoard> newSudokuBoardNodesExtendedFromActualNode = selectedSudokuBoard.extendBoard();
@@ -276,7 +278,13 @@ public class Search {
             addExpandedNodesThatWasNotVisitedIntoStack(selectedSudokuBoard, stack, visitedSudokuBoardNode, exploredSudokuBoardNodes, newSudokuBoardNodesExtendedFromActualNode);
         }
 
-        return selectedSudokuBoard;
+        sudokuResponse.setResolutionMethod("Busca em profundidade Iterativa "+su.board.length+"x"+su.board.length);
+        sudokuResponse.setSteps(visitedSudokuBoardNode);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedSudokuBoardNode.size()));
+        sudokuResponse.setQuantityExploredNodes(String.valueOf(exploredSudokuBoardNodes.size()));
+        sudokuResponse.setComplexity(su.getSudokuBoardType().name());
+
+        return sudokuResponse;
 
     }
 

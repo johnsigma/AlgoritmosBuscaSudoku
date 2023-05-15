@@ -44,20 +44,24 @@ public class Main {
 
                     start = System.currentTimeMillis();
 
-                    sudokuBoardResult = search.depthLimitedSearch(10000, sudokuBoard);
+                    SudokuResponse sudokuResponse = new SudokuResponse();
+
+                    sudokuResponse = search.iterativeDepthSearch(10000, sudokuBoard);
+                    //sudokuResponse = search.depthLimitedSearch(10000, sudokuBoard, sudokuResponse);
 
                     finish = System.currentTimeMillis();
                     timeElapsed = finish - start;
 
                     System.out.println("-----------Tabuleiro final------------");
-                    sudokuBoardResult.printBoard();
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
 
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
 
-                    String outputPath = "saida/".concat(LocalDateTime.now().toString()).concat(".txt");
-                    SudokuResponse sudokuResponse = new SudokuResponse();
+                    String outputPath = "saida/".concat("Busca-Profundidade-Iterativa-"+ LocalDateTime.now()).concat(".txt");
+
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
+
                 }
                 case 2 -> {
                     System.out.println("Greedy 1:");

@@ -11,6 +11,21 @@ public class SudokuResponse {
     private String complexity;
     private String finalCost;
 
+    private String initialCost;
+    private String quantityOfVisitedNodes;
+    private String quantityExploredNodes;
+    private String spentTime;
+
+    public String getDepth() {
+        return depth;
+    }
+
+    public void setDepth(String depth) {
+        this.depth = depth;
+    }
+
+    private String depth;
+
     public String getInitialCost() {
         return initialCost;
     }
@@ -19,9 +34,14 @@ public class SudokuResponse {
         this.initialCost = initialCost;
     }
 
-    private String initialCost;
-    private String quantityOfVisitedNodes;
-    private String spentTime;
+
+    public String getQuantityExploredNodes() {
+        return quantityExploredNodes;
+    }
+
+    public void setQuantityExploredNodes(String quantityExploredNodes) {
+        this.quantityExploredNodes = quantityExploredNodes;
+    }
 
     public String getSpentTime() {
         return spentTime;

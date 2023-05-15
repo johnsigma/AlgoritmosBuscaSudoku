@@ -37,10 +37,28 @@ public class FileHandler {
     public static void writeToFile(String filePath, SudokuResponse sudokuResponse) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("Algoritmo: " + sudokuResponse.getResolutionMethod() + "\n");
-            writer.write("Complexidade: " + sudokuResponse.getComplexity()+ "\n");
-            writer.write("Custo inicial: " + sudokuResponse.getInitialCost()+ "\n");
-            writer.write("Custo final: " + sudokuResponse.getFinalCost()+ "\n");
-            writer.write("Nós visitados: " + sudokuResponse.getQuantityOfVisitedNodes()+ "\n");
+            writer.write("Complexidade: " + (sudokuResponse.getComplexity().equals("COMPLEX") ? "COMPLEXO": "SIMPLES")+ "\n");
+
+            if(sudokuResponse.getInitialCost() != null) {
+                writer.write("Custo inicial: " + sudokuResponse.getInitialCost()+ "\n");
+            }
+
+            if(sudokuResponse.getFinalCost() != null) {
+                writer.write("Custo final: " + sudokuResponse.getFinalCost()+ "\n");
+            }
+
+            if(sudokuResponse.getQuantityOfVisitedNodes() != null) {
+                writer.write("Nós visitados: " + sudokuResponse.getQuantityOfVisitedNodes()+ "\n");
+            }
+
+            if(sudokuResponse.getQuantityExploredNodes() != null) {
+                writer.write("Quantidade nós explorados: " + sudokuResponse.getQuantityExploredNodes()+ "\n");
+            }
+
+            if(sudokuResponse.getDepth() != null) {
+                writer.write("Profundidade da meta: " + sudokuResponse.getDepth()+ "\n");
+            }
+
             writer.write("Tempo de execução: " + sudokuResponse.getSpentTime()+" segundos" +"\n");
             writer.write("Estados gerados: " + sudokuResponse.getSteps()+ "\n");
         } catch (IOException e) {
