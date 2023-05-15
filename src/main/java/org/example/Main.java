@@ -158,11 +158,8 @@ public class Main {
     }
 
     private static SudokuBoard readSudokuGameFromFile(String fileName, Type type) throws IOException {
-        ClassLoader classLoader = Main.class.getClassLoader();
 
-        String path = Objects.requireNonNull(classLoader.getResource(fileName)).getPath();
-
-        Tuple tuple = FileHandler.readFile(path);
+        Tuple tuple = FileHandler.readFile(fileName);
 
         String strTable = tuple.strTable;
         int n = tuple.numberOfLines;
