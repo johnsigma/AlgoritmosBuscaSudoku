@@ -15,6 +15,25 @@ public class SudokuResponse {
     private String quantityOfVisitedNodes;
     private String quantityExploredNodes;
     private String spentTime;
+    private String initialTemperature;
+
+    public String getInitialTemperature() {
+        return initialTemperature;
+    }
+
+    public void setInitialTemperature(String initialTemperature) {
+        this.initialTemperature = initialTemperature;
+    }
+
+    public String getFinalTemperature() {
+        return finalTemperature;
+    }
+
+    public void setFinalTemperature(String finalTemperature) {
+        this.finalTemperature = finalTemperature;
+    }
+
+    private String finalTemperature;
 
     public String getDepth() {
         return depth;

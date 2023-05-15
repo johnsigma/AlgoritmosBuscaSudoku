@@ -59,6 +59,14 @@ public class FileHandler {
                 writer.write("Profundidade da meta: " + sudokuResponse.getDepth()+ "\n");
             }
 
+            if(sudokuResponse.getInitialTemperature() != null) {
+                writer.write("Temperatura inicial: " + sudokuResponse.getInitialTemperature()+ "\n");
+            }
+
+            if(sudokuResponse.getFinalTemperature() != null) {
+                writer.write("Temperatura final: " + sudokuResponse.getFinalTemperature()+ "\n");
+            }
+
             writer.write("Tempo de execução: " + sudokuResponse.getSpentTime()+" segundos" +"\n");
             writer.write("Estados gerados: " + sudokuResponse.getSteps()+ "\n");
         } catch (IOException e) {

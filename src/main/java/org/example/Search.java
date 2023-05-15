@@ -309,6 +309,8 @@ public class Search {
         int visitedNodes = 0;
 
         SudokuResponse sudokuResponse = new SudokuResponse();
+        sudokuResponse.setInitialTemperature(String.valueOf(temperature));
+
         List<SudokuBoard> steps = new ArrayList<>();
 
         SudokuBoard firstBoardVersion = new SudokuBoard(sudokuBoard.getSudokuBoardType());
@@ -361,6 +363,7 @@ public class Search {
 
         int finalCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
 
+        sudokuResponse.setFinalTemperature(String.valueOf(temperature));
 
         sudokuResponse.setResolutionMethod("Têmpera Simulada de tamanho "+sudokuBoard.board.length+"x"+sudokuBoard.board.length);
         sudokuResponse.setFinalCost(String.valueOf(finalCost));
