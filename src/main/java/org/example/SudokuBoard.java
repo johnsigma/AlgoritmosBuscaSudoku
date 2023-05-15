@@ -324,7 +324,7 @@ public class SudokuBoard implements Cloneable {
         return newBoard;
     }
 
-    public ModifiedBoard perturbBoardForHillClimbing(int row, int column) {
+    public int[][] perturbBoardForHillClimbing(int row, int column) {
         Random random = new Random();
 
         int boardSize = board.length;
@@ -333,18 +333,13 @@ public class SudokuBoard implements Cloneable {
 
         int value = random.nextInt(boardSize) + 1;
 
-        ModifiedBoard modifiedBoard = new ModifiedBoard(newBoard, row, column, newBoard[row][column], value);
+        if(isValidMove(row, column, value)) {
+            newBoard[row][column] = value;
 
-        int originalCost = calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(board);
-        newBoard[row][column] = value;
-        int newCost = calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
-
-        if(isValidMove(row, column, value) && newCost < originalCost) {
-            modifiedBoard.newBoard = newBoard;
-            return modifiedBoard;
+            return newBoard;
         }
 
-        return modifiedBoard;
+        return newBoard;
     }
 
     public boolean acceptPerturbedSolution(int newCost, int oldCost, double temperature) {
@@ -400,6 +395,38 @@ public class SudokuBoard implements Cloneable {
             }
         }
         return this;
+    }
+
+    public CoordinateCell listOfCoordinatesOfCells() {
+        CoordinateCell coordinateCell= new CoordinateCell();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                if(board[i][j] != 0 || board[i][j] == 0) {
+                    Coordinate coordinate = new Coordinate();
+                    coordinate.row = i;
+                    coordinate.column = j;
+                    coordinateCell.coordinate.add(coordinate);
+                }
+            }
+        }
+        return coordinateCell;
+    }
+
+    public CoordinateCell listOfCoordinatesOfCellsThatAreEmpty() {
+        CoordinateCell coordinateCell= new CoordinateCell();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                if(board[i][j] == 0) {
+                    Coordinate coordinate = new Coordinate();
+                    coordinate.row = i;
+                    coordinate.column = j;
+                    coordinateCell.coordinate.add(coordinate);
+                }
+            }
+        }
+        return coordinateCell;
     }
 
 }

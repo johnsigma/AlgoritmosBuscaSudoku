@@ -8,6 +8,7 @@ public class Search {
     private static final double INITIAL_TEMPERATURE = 1.0;
     private static final double COOLING_FACTOR = 0.95;
     private static final double FINAL_TEMPERATURE = 0.0001;
+    private static final int HILL_CLIMBING_MAX_ITERATIONS = 100000;
 
     Search() {
 
@@ -310,76 +311,94 @@ public class Search {
         return sudokuBoard;
     }
 
-    private static final int MAX_ITERATIONS = 10000;
-    public SudokuBoard hillClimbing(SudokuBoard sudokuBoard) {
-        //putIntoEmptyCellsRandomNumbers(board);
-        Random rand = new Random();
-        int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(sudokuBoard.board);
-        int bestCost = currentCost;
-        int quantidadeTentativasMovimentosLaterais = 0;
-        int MAX_MOVES_WITHOUT_IMPROVEMENT = 100;
-        boolean foundBetter = false;
+    public SudokuBoard hillClimbingWithLateralMoves(SudokuBoard sudokuBoard) {
+        int quantityOfLateralMoves = 0;
+        int MAX_MOVES_WITHOUT_IMPROVEMENT = 1000;
+        boolean foundBetterCostBoard;
         int maxIterations = 0;
 
-        int row = 0, column = 0;
+        int row, column;
+        Random random = new Random();
 
-        while (!sudokuBoard.isSolution() || maxIterations < MAX_ITERATIONS) {
+        while (!sudokuBoard.isSolution() && maxIterations < HILL_CLIMBING_MAX_ITERATIONS) {
 
-            for (int i = 0; i < sudokuBoard.board.length; i++) {
-                for (int j = 0; j < sudokuBoard.board.length; j++) {
-                    if(sudokuBoard.board[i][j] == 0 ) {
-                        row = i;
-                        column = j;
-                        foundBetter = false;
-                        SudokuBoard newPositionToTry = new SudokuBoard(sudokuBoard.board.length, sudokuBoard.getSudokuBoardType());
-                        newPositionToTry.board = sudokuBoard.board;
-                        newPositionToTry.size = sudokuBoard.size;
-                        ModifiedBoard modifiedBoard = newPositionToTry.perturbBoardForHillClimbing(row, column);
+            CoordinateCell coordinateEmptyCells = sudokuBoard.listOfCoordinatesOfCellsThatAreEmpty();
 
-                        int custoVizinho = newPositionToTry.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(modifiedBoard.newBoard);
-                        int custoBoardOriginal = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+            Coordinate randomEmptyCell = coordinateEmptyCells.coordinate.get(random.nextInt(coordinateEmptyCells.coordinate.size()));
 
-                        if (custoVizinho < custoBoardOriginal) {
-                            sudokuBoard.board = modifiedBoard.newBoard;
-                            custoBoardOriginal = custoVizinho;
-                            foundBetter = true;
-                        }
+            row = randomEmptyCell.row;
+            column = randomEmptyCell.column;
+            foundBetterCostBoard = false;
+
+            SudokuBoard neighborBoard = new SudokuBoard(sudokuBoard.board.length, sudokuBoard.getSudokuBoardType());
+            neighborBoard.board = sudokuBoard.board;
+            neighborBoard.size = sudokuBoard.size;
+
+            int[][] newBoard = neighborBoard.perturbBoardForHillClimbing(row, column);
+
+            int neighborCost = neighborBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
+            int costOriginalBoard = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+            if (neighborCost < costOriginalBoard) {
+                sudokuBoard.board = newBoard;
+                foundBetterCostBoard = true;
+            }
+
+            if(!foundBetterCostBoard) {
+                while (true)  {
+
+
+                    newBoard = new int[sudokuBoard.board.length][sudokuBoard.board.length];
+
+                    copyBoard(sudokuBoard.board, newBoard);
+
+                    CoordinateCell coordinateCell = sudokuBoard.listOfCoordinatesOfCells();
+
+                    Coordinate first = coordinateCell.coordinate.get(random.nextInt(coordinateCell.coordinate.size()));
+                    Coordinate second = coordinateCell.coordinate.get(random.nextInt(coordinateCell.coordinate.size()));
+
+                    int firstValueTemp, secondValueTemp;
+
+                    int firstRow = first.row;
+                    int firstColumn = first.column;
+                    int secondRow = second.row;
+                    int secondColumn = second.column;
+
+
+                    firstValueTemp = newBoard[firstRow][firstColumn];
+                    secondValueTemp = newBoard[secondRow][secondColumn];
+
+                    newBoard[firstRow][firstColumn] = secondValueTemp;
+                    newBoard[secondRow][secondColumn] = firstValueTemp;
+
+                    int costNeighborThatHadLateralMove = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
+                    costOriginalBoard = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+                    quantityOfLateralMoves++;
+                    if (costNeighborThatHadLateralMove <= costOriginalBoard) {
+                        sudokuBoard.board = newBoard;
+                        quantityOfLateralMoves = 0;
+                        break;
                     }
 
-
-                    if(!foundBetter) {
-                        int newScore = -1;
-                        while (true)  {
-                            SudokuBoard newBoardCopied = new SudokuBoard(sudokuBoard.board.length, sudokuBoard.getSudokuBoardType());
-                            newBoardCopied.board = sudokuBoard.board;
-                            newBoardCopied.size = sudokuBoard.size;
-
-                            ModifiedBoard modifiedBoard = newBoardCopied.perturbBoardForHillClimbing(row, column);
-
-                            int custoVizinho = newBoardCopied.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(modifiedBoard.newBoard);
-                            int custoBoardOriginal = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
-
-                            quantidadeTentativasMovimentosLaterais++;
-                            if (custoVizinho < custoBoardOriginal) {
-                                custoBoardOriginal = custoVizinho;
-                                sudokuBoard.board = newBoardCopied.board;
-                                quantidadeTentativasMovimentosLaterais = 0;
-                                break;
-                            }
-
-                            if(quantidadeTentativasMovimentosLaterais >= MAX_MOVES_WITHOUT_IMPROVEMENT) {
-
-                                quantidadeTentativasMovimentosLaterais = 0;
-                                break;
-                            }
-                        }
+                    if(quantityOfLateralMoves >= MAX_MOVES_WITHOUT_IMPROVEMENT) {
+                        quantityOfLateralMoves = 0;
+                        break;
                     }
                 }
             }
 
             maxIterations++;
+            System.out.println("Iterations: " + maxIterations);
+            sudokuBoard.printBoard();
         }
         return sudokuBoard;
+    }
+
+    private static void copyBoard(int[][] source, int[][] dest) {
+        for (int i = 0; i < source.length; i++) {
+            System.arraycopy(source[i], 0, dest[i], 0, source.length);
+        }
     }
 
 }

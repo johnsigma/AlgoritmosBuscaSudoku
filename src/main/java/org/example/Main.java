@@ -15,7 +15,7 @@ public class Main {
         String path = Objects.requireNonNull(classLoader.getResource(fileName)).getPath();
 
         Tuple tuple = FileHandler.readFile(path);
-        Type sudokuBoardType = Type.SIMPLE;
+        Type sudokuBoardType = Type.COMPLEX;
 
         String strTable = tuple.strTable;
         int n = tuple.numberOfLines;
@@ -45,7 +45,7 @@ public class Main {
         //suResult = search.iterativeDepthSearch(100000, sudokuBoard);
         //System.out.println("\nTempera simulada: ");
         ///suResult = search.simulatedAnnealing(sudokuBoard);
-        suResult = search.hillClimbing(sudokuBoard);
+        suResult = search.hillClimbingWithLateralMoves(sudokuBoard);
 
         //SudokuBoard sudokuBoard1 = new SudokuBoard(6, sudokuBoardType);
         //sudokuBoard1.initializeBoard();
