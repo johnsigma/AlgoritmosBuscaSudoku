@@ -15,7 +15,7 @@ public class Main {
         String path = Objects.requireNonNull(classLoader.getResource(fileName)).getPath();
 
         Tuple tuple = FileHandler.readFile(path);
-        Type sudokuBoardType = Type.SIMPLE;
+        Type sudokuBoardType = Type.COMPLEX;
 
         String strTable = tuple.strTable;
         int n = tuple.numberOfLines;
@@ -44,19 +44,20 @@ public class Main {
         //suResult = search.depthLimitedSearch(10000, sudokuBoard);
         //suResult = search.iterativeDepthSearch(100000, sudokuBoard);
         //System.out.println("\nTempera simulada: ");
-        //suResult = search.simulatedAnnealing(sudokuBoard);
+        ///suResult = search.simulatedAnnealing(sudokuBoard);
+        suResult = search.hillClimbingWithLateralMoves(sudokuBoard);
 
-        SudokuBoard sudokuBoard1 = new SudokuBoard(6, sudokuBoardType);
-        sudokuBoard1.initializeBoard();
-        sudokuBoard1.printBoard();
-        search.simulatedAnnealing(sudokuBoard1);
+        //SudokuBoard sudokuBoard1 = new SudokuBoard(6, sudokuBoardType);
+        //sudokuBoard1.initializeBoard();
+        //sudokuBoard1.printBoard();
+        //search.simulatedAnnealing(sudokuBoard1);
 
         long finish = System.currentTimeMillis();
 
         long timeElapsed = finish - start;
 
         System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
-        sudokuBoard1.printBoard();
+        suResult.printBoard();
         System.out.println("\nTempo execução: "+ (timeElapsed/ 1000d) +" segundos");
 
     }
