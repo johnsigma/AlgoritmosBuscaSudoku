@@ -7,13 +7,18 @@ public class SudokuBoard implements Cloneable {
     public int[][] board;
     public int size;
     private int heuristicCost;
-
     private final Type type;
+
+    public String stringBoard;
 
     public SudokuBoard(int size, Type type) {
         this.size = size;
         this.type = type;
         this.board = new int[size][size];
+    }
+
+    public SudokuBoard(Type type) {
+        this.type = type;
     }
 
     public void populateBoardByTxtFile(String str) {
@@ -150,6 +155,43 @@ public class SudokuBoard implements Cloneable {
             System.out.println();
         }
         System.out.print(divisionBar+"\n");
+    }
+
+    public String convertBoardIntoString() {
+
+        double repeatFactor = (this.size > 4 ? 2.8 : 3.3);
+
+        String divisionBar = "-".repeat((int) (this.size * repeatFactor));
+
+        String divisionBarWithBreakLine = "\n" + divisionBar + "\n";
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(divisionBarWithBreakLine);
+
+
+        for (int row = 0; row < this.size; row++) {
+            if (row % Math.sqrt(this.size) == 0 && row != 0) {
+                sb.append(divisionBar+"\n");
+            }
+            for (int col = 0; col < this.size; col++) {
+                if (col % Math.sqrt(this.size) == 0 && col != 0) {
+                    sb.append("| ");
+                }
+                if(col == 0) {
+                    sb.append("| "+this.board[row][col] + " ");
+                } else if (col == this.size - 1) {
+                    sb.append(this.board[row][col] + " |");
+                } else {
+                    sb.append(this.board[row][col] + " ");
+                }
+            }
+            sb.append("\n");
+        }
+        sb.append(divisionBar+"\n");
+
+        this.stringBoard = sb.toString();
+
+        return sb.toString();
     }
 
     private int[] getNextEmptyCell() {
@@ -429,4 +471,9 @@ public class SudokuBoard implements Cloneable {
         return coordinateCell;
     }
 
+    @Override
+    public String toString() {
+
+        return convertBoardIntoString();
+    }
 }

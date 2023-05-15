@@ -1,7 +1,9 @@
 package org.example;
 
+import org.example.response.SudokuResponse;
+
 import java.io.IOException;
-import java.util.Objects;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class Main {
@@ -19,6 +21,7 @@ public class Main {
         Type type;
         String fileName;
         int option;
+
         do {
             menu();
             Scanner input = new Scanner(System.in);
@@ -50,6 +53,11 @@ public class Main {
                     sudokuBoardResult.printBoard();
 
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    String outputPath = "saida/".concat(LocalDateTime.now().toString()).concat(".txt");
+                    SudokuResponse sudokuResponse = new SudokuResponse();
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
                 }
                 case 2 -> {
                     System.out.println("Greedy 1:");
@@ -116,15 +124,22 @@ public class Main {
                     sudokuBoard.printBoard();
 
                     start = System.currentTimeMillis();
+                    SudokuResponse sudokuResponse;
 
-                    sudokuBoardResult = search.hillClimbingWithLateralMoves(sudokuBoard);
+                    sudokuResponse = search.hillClimbingWithLateralMoves(sudokuBoard);
 
                     finish = System.currentTimeMillis();
                     timeElapsed = finish - start;
 
                     System.out.println("-----------Tabuleiro final------------");
-                    sudokuBoardResult.printBoard();
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now()).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
+
                 }
                 case 5 -> {
                     System.out.println("\nTêmpera simulada: ");
@@ -143,14 +158,22 @@ public class Main {
 
                     start = System.currentTimeMillis();
 
-                    sudokuBoardResult = search.simulatedAnnealing(sudokuBoard);
+                    SudokuResponse sudokuResponse;
+
+                    //sudokuBoardResult = search.simulatedAnnealing(sudokuBoard);
+                    sudokuResponse = search.simulatedAnnealing(sudokuBoard);
 
                     finish = System.currentTimeMillis();
                     timeElapsed = finish - start;
 
                     System.out.println("-----------Tabuleiro final------------");
-                    sudokuBoardResult.printBoard();
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    String outputPath = "saida/".concat("Têmpera-Simulada-"+ LocalDateTime.now()).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
                 }
             }
         } while(option != 6);

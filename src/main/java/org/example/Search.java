@@ -1,10 +1,12 @@
 package org.example;
 
+import org.example.response.SudokuResponse;
+
 import java.util.*;
 
 public class Search {
 
-    private static final int SIMULATED_ANNEALING_MAX_MOVES = 10000;
+    private static final int SIMULATED_ANNEALING_MAX_MOVES = 100000;
     private static final double SIMULATED_ANNEALING_INITIAL_TEMPERATURE = 1.0;
     private static final double SIMULATED_ANNEALING_COOLING_FACTOR = 0.95;
     private static final double SIMULATED_ANNEALING_FINAL_TEMPERATURE = 0.0001;
@@ -290,29 +292,79 @@ public class Search {
     }
 
 
-    public SudokuBoard simulatedAnnealing(SudokuBoard sudokuBoard) {
-        int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(sudokuBoard.board);
+    public SudokuResponse simulatedAnnealing(SudokuBoard sudokuBoard) {
+        int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+        int initialCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
         int bestCost = currentCost;
         double temperature = SIMULATED_ANNEALING_INITIAL_TEMPERATURE;
+
+        int visitedNodes = 0;
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
+        List<SudokuBoard> steps = new ArrayList<>();
+
+        SudokuBoard firstBoardVersion = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+        firstBoardVersion.board = sudokuBoard.board;
+        firstBoardVersion.size = sudokuBoard.size;
+
+        steps.add(firstBoardVersion);
+
+        boolean isSolution = false;
 
         while (temperature > SIMULATED_ANNEALING_FINAL_TEMPERATURE) {
             for (int i = 0; i < SIMULATED_ANNEALING_MAX_MOVES; i++) {
                 int[][] newBoard = sudokuBoard.perturbBoard();
-                int newCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(newBoard);
+                int newCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
                 if (sudokuBoard.acceptPerturbedSolution(newCost, currentCost, temperature)) {
-                    sudokuBoard.board = newBoard;
-                    currentCost = newCost;
-                    if (currentCost < bestCost) {
-                        bestCost = currentCost;
+
+                    if(sudokuBoard.isSolution()) {
+                        if(!isSolution) {
+                            SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+
+                            sudokuBoard.board = newBoard;
+
+                            sudokuBoardCopy.board = sudokuBoard.board;
+                            sudokuBoardCopy.size = sudokuBoard.size;
+                            sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
+
+                            steps.add(sudokuBoardCopy);
+                            isSolution = true;
+                            visitedNodes++;
+                        }
+                        continue;
                     }
+
+                    SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+
+                    sudokuBoard.board = newBoard;
+
+                    sudokuBoardCopy.board = sudokuBoard.board;
+                    sudokuBoardCopy.size = sudokuBoard.size;
+                    sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
+
+                    steps.add(sudokuBoardCopy);
+                    visitedNodes++;
+
+                    currentCost = newCost;
                 }
             }
             temperature *= SIMULATED_ANNEALING_COOLING_FACTOR;
         }
-        return sudokuBoard;
+
+        int finalCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+
+        sudokuResponse.setResolutionMethod("Têmpera Simulada de tamanho "+sudokuBoard.board.length+"x"+sudokuBoard.board.length);
+        sudokuResponse.setFinalCost(String.valueOf(finalCost));
+        sudokuResponse.setInitialCost(String.valueOf(initialCost));
+        sudokuResponse.setSteps(steps);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedNodes));
+        sudokuResponse.setComplexity(sudokuBoard.getSudokuBoardType().name());
+
+        return sudokuResponse;
     }
 
-    public SudokuBoard hillClimbingWithLateralMoves(SudokuBoard sudokuBoard) {
+    public SudokuResponse hillClimbingWithLateralMoves(SudokuBoard sudokuBoard) {
         int quantityOfLateralMoves = 0;
         boolean foundBetterCostBoard;
         int maxIterations = 0;
@@ -320,6 +372,18 @@ public class Search {
         int row, column;
         Random random = new Random();
 
+        int visitedNodes = 0;
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
+        List<SudokuBoard> steps = new ArrayList<>();
+
+        SudokuBoard firstBoardVersion = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+        firstBoardVersion.board = sudokuBoard.board;
+        firstBoardVersion.size = sudokuBoard.size;
+        int initialCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+        steps.add(firstBoardVersion);
+        int costOriginalBoard = 0, neighborCost;
         while (!sudokuBoard.isSolution() && maxIterations < HILL_CLIMBING_MAX_ITERATIONS) {
 
             CoordinateCell coordinateEmptyCells = sudokuBoard.listOfCoordinatesOfCellsThatAreEmpty();
@@ -336,11 +400,22 @@ public class Search {
 
             int[][] newBoard = neighborBoard.perturbBoardForHillClimbing(row, column);
 
-            int neighborCost = neighborBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
-            int costOriginalBoard = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+            neighborCost = neighborBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
+            costOriginalBoard = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
 
             if (neighborCost < costOriginalBoard) {
+
+                SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+
                 sudokuBoard.board = newBoard;
+
+                sudokuBoardCopy.board = sudokuBoard.board;
+                sudokuBoardCopy.size = sudokuBoard.size;
+                sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
+
+                steps.add(sudokuBoardCopy);
+                visitedNodes++;
+
                 foundBetterCostBoard = true;
             }
 
@@ -376,7 +451,18 @@ public class Search {
 
                     quantityOfLateralMoves++;
                     if (costNeighborThatHadLateralMove <= costOriginalBoard) {
+
+                        SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+
                         sudokuBoard.board = newBoard;
+
+                        sudokuBoardCopy.board = sudokuBoard.board;
+                        sudokuBoardCopy.size = sudokuBoard.size;
+                        sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
+
+                        steps.add(sudokuBoardCopy);
+                        visitedNodes++;
+
                         quantityOfLateralMoves = 0;
                         break;
                     }
@@ -392,7 +478,18 @@ public class Search {
             System.out.println("Iterations: " + maxIterations);
             sudokuBoard.printBoard();
         }
-        return sudokuBoard;
+
+        int finalCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+
+        sudokuResponse.setResolutionMethod("Subida Encosta com Movimentos Laterais de tamanho "+sudokuBoard.board.length+"x"+sudokuBoard.board.length);
+        sudokuResponse.setFinalCost(String.valueOf(finalCost));
+        sudokuResponse.setInitialCost(String.valueOf(initialCost));
+        sudokuResponse.setSteps(steps);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedNodes));
+        sudokuResponse.setComplexity(sudokuBoard.getSudokuBoardType().name());
+
+        return sudokuResponse;
     }
 
     private static void copyBoard(int[][] source, int[][] dest) {
