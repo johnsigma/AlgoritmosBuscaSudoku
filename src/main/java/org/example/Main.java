@@ -48,7 +48,6 @@ public class Main {
                     SudokuResponse sudokuResponse;
 
                     sudokuResponse = search.iterativeDepthSearch(10000, sudokuBoard);
-                    //sudokuResponse = search.depthLimitedSearch(10000, sudokuBoard, sudokuResponse);
 
                     finish = System.currentTimeMillis();
                     timeElapsed = finish - start;
@@ -87,7 +86,7 @@ public class Main {
                     sudokuResponse = search.greedySearch(sudokuBoard);
 
                     //System.out.println("\nGreedy 2:");
-                    //sudokuBoardResult = search.greedySearch2(sudokuBoard);
+                    //sudokuResponse = search.greedySearch2(sudokuBoard);
 
                     finish = System.currentTimeMillis();
                     timeElapsed = finish - start;
@@ -114,7 +113,9 @@ public class Main {
                     sudokuBoard.printBoard();
                     start = System.currentTimeMillis();
 
-                    //sudokuBoardResult = search.aStar(sudokuBoard); (implementar essa funcao))
+                    SudokuResponse sudokuResponse = new SudokuResponse();
+
+                    //sudokuResponse = search.aStar(sudokuBoard); (implementar essa funcao))
 
                     finish = System.currentTimeMillis();
                     timeElapsed = finish - start;
@@ -122,6 +123,13 @@ public class Main {
                     System.out.println("-----------Tabuleiro final------------");
                     sudokuBoard.printBoard();
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
                 }
                 case 4 -> {
                     System.out.println("Subida de Encosta com Movimentos Laterais: ");
