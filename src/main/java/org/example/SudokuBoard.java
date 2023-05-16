@@ -7,6 +7,7 @@ public class SudokuBoard implements Cloneable {
     public int[][] board;
     public int size;
     private int heuristicCost;
+    private int cost;
 
     public SudokuBoard(int size) {
         this.size = size;
@@ -42,6 +43,10 @@ public class SudokuBoard implements Cloneable {
         return this.heuristicCost;
     }
 
+    public int getTotalCost() {
+        return this.heuristicCost + this.cost;
+    }
+
     public void setHeuristic() {
         int emptyCells = 0;
 
@@ -75,6 +80,60 @@ public class SudokuBoard implements Cloneable {
         }
 
         return count;
+    }
+
+    public void setCosts(ArrayList<SudokuBoard> sus) {
+        for (SudokuBoard su : sus) {
+            int cost = 0;
+
+            for (int row = 0; row < 9; row++) {
+                for (int col = 0; col < 9; col++) {
+                    cost += su.getManhattanDistance(row, col);
+                }
+            }
+
+            su.setCost(cost);
+        }
+    }
+
+    public void setCostFunction() {
+
+        int cost = 0;
+
+        for (int row = 0; row < this.size; row++) {
+            for (int col = 0; col < this.size; col++) {
+                cost += this.getManhattanDistance(row, col);
+            }
+        }
+
+        this.setCost(cost);
+
+    }
+
+    public void setCost(int cost) {
+        this.cost = cost;
+    }
+
+    public int getCost() {
+        return cost;
+    }
+
+    public int getManhattanDistance(int row, int col) {
+        if (this.board[row][col] != 0) {
+            return 0; // Retorna 0 para células preenchidas
+        }
+
+        int targetRow, targetCol;
+
+        // Encontre a posição correta da célula vazia com base no valor do Sudoku
+        // (subtraia 1 porque os índices de array começam em 0)
+        targetRow = (this.board[row][col] - 1) / this.size;
+        targetCol = (this.board[row][col] - 1) % this.size;
+
+        // Calcule a distância de Manhattan
+        int distance = Math.abs(row - targetRow) + Math.abs(col - targetCol);
+
+        return distance;
     }
 
     public int getCell(int row, int col) {

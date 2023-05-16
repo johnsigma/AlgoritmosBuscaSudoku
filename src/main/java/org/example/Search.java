@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.Stack;
 
 public class Search {
@@ -48,6 +52,19 @@ public class Search {
         for (int i = 0; i < sus.size(); i++) {
             sus.get(i).setHeuristic();
         }
+    }
+
+    public void setHeuristic2(SudokuBoard su) {
+
+        int heuristic = 0;
+
+        for (int row = 0; row < su.size; row++) {
+            for (int col = 0; col < su.size; col++) {
+                heuristic += su.getPossibilitiesCount(row, col);
+            }
+        }
+
+        su.setHeuristicCost(heuristic);
 
     }
 
@@ -82,6 +99,83 @@ public class Search {
         if (!isAdded) {
             list.add(su);
         }
+    }
+
+    public SudokuBoard aStarSearch(SudokuBoard initialBoard) throws CloneNotSupportedException {
+
+        int numberOfSteps = 0;
+
+        // Inicialização do openSet e visitedNodes
+        PriorityQueue<SudokuBoard> openSet = new PriorityQueue<SudokuBoard>(
+                Comparator.comparingInt(SudokuBoard::getTotalCost));
+
+        Set<SudokuBoard> visitedNodes = new HashSet<>();
+
+        // Definir o custo inicial e heurística para o estado inicial
+        initialBoard.setCostFunction();
+        this.setHeuristic2(initialBoard);
+
+        // Adicionar o estado inicial ao openSet
+        openSet.add(initialBoard);
+
+        while (!openSet.isEmpty()) {
+
+            numberOfSteps++;
+
+            SudokuBoard currentBoard = openSet.poll();
+            currentBoard.setCostFunction();
+            this.setHeuristic2(currentBoard);
+
+            // Verificar se o estado atual é a solução
+            if (currentBoard.isSolution()) {
+
+                System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
+                        + visitedNodes.size() + " nós.");
+
+                return currentBoard;
+            }
+
+            // Adicionar o estado atual ao visitedNodes
+            // if (!visitedNodes.contains(currentBoard))
+            // visitedNodes.add(currentBoard);
+
+            // Gerar e avaliar estados vizinhos
+            List<SudokuBoard> neighbors = currentBoard.extendBoard();
+
+            int currentCost = currentBoard.getTotalCost();
+
+            if (neighbors == null)
+                continue;
+
+            if (neighbors.size() > 0) {
+
+                // if (!visitedNodes.contains(currentBoard))
+                // visitedNodes.add(currentBoard);
+
+                for (SudokuBoard neighbor : neighbors) {
+                    // Verificar se o estado vizinho já foi explorado
+                    if (visitedNodes.contains(neighbor)) {
+                        continue;
+                    }
+
+                    neighbor.setCostFunction();
+                    this.setHeuristic2(neighbor);
+
+                    // Calcular o custo para o vizinho
+                    int newTotalCost = neighbor.getTotalCost();
+
+                    if (!openSet.contains(neighbor) || newTotalCost < currentCost) {
+                        openSet.add(neighbor);
+                        if (!visitedNodes.contains(currentBoard))
+                            visitedNodes.add(currentBoard);
+                    }
+                }
+            }
+
+        }
+
+        System.out.println("Solução não encontrada!");
+        return null; // Nenhuma solução encontrada
     }
 
     public SudokuBoard greedySearch(SudokuBoard su) throws CloneNotSupportedException {
