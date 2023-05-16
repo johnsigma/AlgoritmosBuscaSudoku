@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Search {
 
-    private static final int SIMULATED_ANNEALING_MAX_MOVES = 100000;
+    private static final int SIMULATED_ANNEALING_MAX_MOVES = 1000;
     private static final double SIMULATED_ANNEALING_INITIAL_TEMPERATURE = 1.0;
     private static final double SIMULATED_ANNEALING_COOLING_FACTOR = 0.95;
     private static final double SIMULATED_ANNEALING_FINAL_TEMPERATURE = 0.0001;
@@ -297,27 +297,14 @@ public class Search {
 
         boolean isSolution = false;
 
-        while (temperature > SIMULATED_ANNEALING_FINAL_TEMPERATURE) {
+        while (!sudokuBoard.isSolution() && temperature > SIMULATED_ANNEALING_FINAL_TEMPERATURE) {
             for (int i = 0; i < SIMULATED_ANNEALING_MAX_MOVES; i++) {
                 int[][] newBoard = sudokuBoard.perturbBoard();
                 int newCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
                 if (sudokuBoard.acceptPerturbedSolution(newCost, currentCost, temperature)) {
 
                     if(sudokuBoard.isSolution()) {
-                        if(!isSolution) {
-                            SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
-
-                            sudokuBoard.board = newBoard;
-
-                            sudokuBoardCopy.board = sudokuBoard.board;
-                            sudokuBoardCopy.size = sudokuBoard.size;
-                            sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
-
-                            steps.add(sudokuBoardCopy);
-                            isSolution = true;
-                            visitedNodes++;
-                        }
-                        continue;
+                        break;
                     }
 
                     SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
