@@ -52,7 +52,7 @@ public class SudokuBoard implements Cloneable {
     }
 
     public int getTotalCost() {
-        return this.heuristicCost + this.cost;
+        return this.heuristicCost + this.getCostFunction();
     }
 
     public Type getSudokuBoardType() {
@@ -99,7 +99,8 @@ public class SudokuBoard implements Cloneable {
         // Verifica se o valor já existe na linha, coluna ou subgrid
         for (int i = 0; i < this.size; i++) {
 
-            if (isInvalidPlacement(row, col, value, i)) return false;
+            if (isInvalidPlacement(row, col, value, i))
+                return false;
 
         }
         return true;
@@ -119,18 +120,19 @@ public class SudokuBoard implements Cloneable {
         }
     }
 
-    public void setCostFunction() {
+    public int getCostFunction() {
 
         int cost = 0;
 
         for (int row = 0; row < this.size; row++) {
             for (int col = 0; col < this.size; col++) {
-                cost += this.getManhattanDistance(row, col);
+                // cost += this.getManhattanDistance(row, col);
+                if (this.board[row][col] == 0)
+                    cost += 1;
             }
         }
 
-        this.setCost(cost);
-
+        return cost;
     }
 
     public void setCost(int cost) {
@@ -160,8 +162,9 @@ public class SudokuBoard implements Cloneable {
     }
 
     private boolean isInvalidPlacement(int row, int col, int value, int i) {
-        if(isComplexBoard()) {
-            return isNumberInRow(row, value, i) || isNumberInColumn(col, value, i) || isNumberInSubGrid(row, col, value, i);
+        if (isComplexBoard()) {
+            return isNumberInRow(row, value, i) || isNumberInColumn(col, value, i)
+                    || isNumberInSubGrid(row, col, value, i);
         } else {
             return isNumberInRow(row, value, i) || isNumberInColumn(col, value, i);
         }
@@ -193,18 +196,18 @@ public class SudokuBoard implements Cloneable {
 
         String divisionBar = "-".repeat((int) (this.size * repeatFactor));
 
-        System.out.print("\n"+divisionBar+"\n");
+        System.out.print("\n" + divisionBar + "\n");
 
         for (int row = 0; row < this.size; row++) {
             if (row % Math.sqrt(this.size) == 0 && row != 0) {
-                System.out.print(divisionBar+"\n");
+                System.out.print(divisionBar + "\n");
             }
             for (int col = 0; col < this.size; col++) {
                 if (col % Math.sqrt(this.size) == 0 && col != 0) {
                     System.out.print("| ");
                 }
-                if(col == 0) {
-                    System.out.print("| "+this.board[row][col] + " ");
+                if (col == 0) {
+                    System.out.print("| " + this.board[row][col] + " ");
                 } else if (col == this.size - 1) {
                     System.out.print(this.board[row][col] + " |");
                 } else {
@@ -213,7 +216,7 @@ public class SudokuBoard implements Cloneable {
             }
             System.out.println();
         }
-        System.out.print(divisionBar+"\n");
+        System.out.print(divisionBar + "\n");
     }
 
     public String convertBoardIntoString() {
@@ -227,17 +230,16 @@ public class SudokuBoard implements Cloneable {
 
         sb.append(divisionBarWithBreakLine);
 
-
         for (int row = 0; row < this.size; row++) {
             if (row % Math.sqrt(this.size) == 0 && row != 0) {
-                sb.append(divisionBar+"\n");
+                sb.append(divisionBar + "\n");
             }
             for (int col = 0; col < this.size; col++) {
                 if (col % Math.sqrt(this.size) == 0 && col != 0) {
                     sb.append("| ");
                 }
-                if(col == 0) {
-                    sb.append("| "+this.board[row][col] + " ");
+                if (col == 0) {
+                    sb.append("| " + this.board[row][col] + " ");
                 } else if (col == this.size - 1) {
                     sb.append(this.board[row][col] + " |");
                 } else {
@@ -246,7 +248,7 @@ public class SudokuBoard implements Cloneable {
             }
             sb.append("\n");
         }
-        sb.append(divisionBar+"\n");
+        sb.append(divisionBar + "\n");
 
         this.stringBoard = sb.toString();
 
@@ -258,7 +260,7 @@ public class SudokuBoard implements Cloneable {
             for (int j = 0; j < this.size; j++) {
                 if (this.board[i][j] == 0) {
 
-                    return new int[]{ i, j };
+                    return new int[] { i, j };
                 }
             }
         }
@@ -326,7 +328,7 @@ public class SudokuBoard implements Cloneable {
 
         cost = getCostOfRepeatedNumbersInColumn(board, cost);
 
-        if(isComplexBoard()) {
+        if (isComplexBoard()) {
             cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
 
         }
@@ -343,14 +345,14 @@ public class SudokuBoard implements Cloneable {
 
         cost = getCostOfEmptyCells(board, cost);
 
-        if(isComplexBoard()) {
+        if (isComplexBoard()) {
             cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
         }
 
         return cost;
     }
 
-    private int getCostOfRepeatedNumbersInSubGrid(int[][] board,int cost) {
+    private int getCostOfRepeatedNumbersInSubGrid(int[][] board, int cost) {
         int boardSize = board.length;
         int regionSize = boardSize == 9 ? 3 : 2;
 
@@ -402,7 +404,7 @@ public class SudokuBoard implements Cloneable {
         int boardSize = board.length;
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
-                if(board[i][j] == 0) {
+                if (board[i][j] == 0) {
                     cost += 1;
                 }
             }
@@ -434,7 +436,7 @@ public class SudokuBoard implements Cloneable {
 
         int value = random.nextInt(boardSize) + 1;
 
-        if(isValidMove(row, column, value)) {
+        if (isValidMove(row, column, value)) {
             newBoard[row][column] = value;
 
             return newBoard;
@@ -499,11 +501,11 @@ public class SudokuBoard implements Cloneable {
     }
 
     public CoordinateCell listOfCoordinatesOfCells() {
-        CoordinateCell coordinateCell= new CoordinateCell();
+        CoordinateCell coordinateCell = new CoordinateCell();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
-                if(board[i][j] != 0 || board[i][j] == 0) {
+                if (board[i][j] != 0 || board[i][j] == 0) {
                     Coordinate coordinate = new Coordinate();
                     coordinate.row = i;
                     coordinate.column = j;
@@ -515,11 +517,11 @@ public class SudokuBoard implements Cloneable {
     }
 
     public CoordinateCell listOfCoordinatesOfCellsThatAreEmpty() {
-        CoordinateCell coordinateCell= new CoordinateCell();
+        CoordinateCell coordinateCell = new CoordinateCell();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
-                if(board[i][j] == 0) {
+                if (board[i][j] == 0) {
                     Coordinate coordinate = new Coordinate();
                     coordinate.row = i;
                     coordinate.column = j;
