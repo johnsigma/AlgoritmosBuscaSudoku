@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Search {
 
-    private static final int SIMULATED_ANNEALING_MAX_MOVES = 1000;
+    private static final int SIMULATED_ANNEALING_MAX_MOVES = 100000;
     private static final double SIMULATED_ANNEALING_INITIAL_TEMPERATURE = 1.0;
     private static final double SIMULATED_ANNEALING_COOLING_FACTOR = 0.95;
     private static final double SIMULATED_ANNEALING_FINAL_TEMPERATURE = 0.0001;
