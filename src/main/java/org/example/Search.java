@@ -541,8 +541,6 @@ public class Search {
             }
 
             maxIterations++;
-
-            sudokuBoard.printBoard();
         }
 
         int finalCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
