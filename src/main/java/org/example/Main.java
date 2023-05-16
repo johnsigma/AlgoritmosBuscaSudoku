@@ -121,7 +121,7 @@ public class Main {
                     timeElapsed = finish - start;
 
                     System.out.println("-----------Tabuleiro final------------");
-                    sudokuBoard.printBoard();
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
 
                     int randomNumber = random.nextInt();

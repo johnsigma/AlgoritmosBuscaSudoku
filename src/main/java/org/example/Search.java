@@ -37,8 +37,6 @@ public class Search {
 
         for (int depth = 1; depth <= limit; depth++) {
 
-            System.out.println("\nIteração: " + depth);
-
             sudokuResponse = this.depthLimitedSearch(depth, su, sudokuResponse);
 
             if (sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).isSolution()) {
@@ -190,16 +188,20 @@ public class Search {
 
         SudokuResponse sudokuResponse = new SudokuResponse();
 
+        SudokuBoard currentBoard = null;
+
         while (!openSet.isEmpty()) {
 
             numberOfSteps++;
 
-            SudokuBoard currentBoard = openSet.poll();
+            currentBoard = openSet.poll();
             currentBoard.setCostFunction();
             this.setHeuristic2(currentBoard);
 
             // Verificar se o estado atual é a solução
             if (currentBoard.isSolution()) {
+
+                exploredNodes.add(currentBoard);
 
                 System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
                         + exploredNodes.size() + " nós.");
@@ -238,11 +240,12 @@ public class Search {
             }
 
         }
+
         sudokuResponse.setResolutionMethod("Busca A estrela de tamanho "+initialBoard.board.length+"x"+initialBoard.board.length);
         sudokuResponse.setSteps(exploredNodes);
         sudokuResponse.setQuantityExploredNodes(String.valueOf(exploredNodes.size()));
         sudokuResponse.setComplexity(initialBoard.getSudokuBoardType().name());
-        System.out.println("Solução não encontrada!");
+        //System.out.println("Solução não encontrada!");
         return sudokuResponse;
     }
 
@@ -547,7 +550,7 @@ public class Search {
             }
 
             maxIterations++;
-            System.out.println("Iterations: " + maxIterations);
+
             sudokuBoard.printBoard();
         }
 
