@@ -7,11 +7,19 @@ public class SudokuBoard implements Cloneable {
     public int[][] board;
     public int size;
     private int heuristicCost;
+    private final Type type;
     private int cost;
 
-    public SudokuBoard(int size) {
+    public String stringBoard;
+
+    public SudokuBoard(int size, Type type) {
         this.size = size;
+        this.type = type;
         this.board = new int[size][size];
+    }
+
+    public SudokuBoard(Type type) {
+        this.type = type;
     }
 
     public void populateBoardByTxtFile(String str) {
@@ -47,6 +55,10 @@ public class SudokuBoard implements Cloneable {
         return this.heuristicCost + this.cost;
     }
 
+    public Type getSudokuBoardType() {
+        return this.type;
+    }
+
     public void setHeuristic() {
         int emptyCells = 0;
 
@@ -80,6 +92,17 @@ public class SudokuBoard implements Cloneable {
         }
 
         return count;
+    }
+
+    public boolean isValidMove(int row, int col, int value) {
+
+        // Verifica se o valor já existe na linha, coluna ou subgrid
+        for (int i = 0; i < this.size; i++) {
+
+            if (isInvalidPlacement(row, col, value, i)) return false;
+
+        }
+        return true;
     }
 
     public void setCosts(ArrayList<SudokuBoard> sus) {
@@ -136,102 +159,106 @@ public class SudokuBoard implements Cloneable {
         return distance;
     }
 
-    public int getCell(int row, int col) {
-        return this.board[row][col];
-    }
-
-    public void setCell(int row, int col, int value) {
-        boolean isValidMove = this.isValidMove(row, col, value);
-
-        if (isValidMove) {
-            // System.out.println("Valor " + value + " adicionado na célula [" + row + "]["
-            // + col + "].");
-            this.board[row][col] = value;
-            return;
+    private boolean isInvalidPlacement(int row, int col, int value, int i) {
+        if(isComplexBoard()) {
+            return isNumberInRow(row, value, i) || isNumberInColumn(col, value, i) || isNumberInSubGrid(row, col, value, i);
+        } else {
+            return isNumberInRow(row, value, i) || isNumberInColumn(col, value, i);
         }
-
-        // System.out.println("Este movimento não é válido.");
     }
 
-    public int[] drawNumberAndPosition() {
-        int row = (int) Math.floor(Math.random() * this.size);
-        int col = (int) Math.floor(Math.random() * this.size);
-        int element = (int) Math.floor(Math.random() * (10 - 1) + 1);
-
-        int[] positionElement = new int[3];
-        positionElement[0] = row;
-        positionElement[1] = col;
-        positionElement[2] = element;
-
-        return positionElement;
+    private boolean isComplexBoard() {
+        return Type.COMPLEX.equals(getSudokuBoardType());
     }
 
-    public void populateBoard() {
-        Random generator = new Random(1);
-
-        while (!this.isComplete()) {
-            int[] positionElement = this.drawNumberAndPosition();
-            int value = positionElement[2];
-            int row = positionElement[0];
-            int col = positionElement[1];
-
-            if (this.board[row][col] != 0)
-                continue;
-
-            this.setCell(row, col, value);
-
-        }
-
+    private boolean isNumberInColumn(int col, int value, int i) {
+        return this.board[i][col] == value;
     }
 
-    public boolean isValidMove(int row, int col, int value) {
+    private boolean isNumberInRow(int row, int value, int i) {
+        return this.board[row][i] == value;
+    }
 
-        // Verifica se o valor já existe na linha, coluna ou subgrid
-        for (int i = 0; i < this.size; i++) {
-
-            if (this.board[row][i] == value || this.board[i][col] == value) {
-                return false;
-            }
-
-            if (this.size > 3) {
-                int subRow = (int) Math.sqrt(this.size) * (row / (int) Math.sqrt(this.size))
-                        + i / (int) Math.sqrt(this.size);
-                int subCol = (int) Math.sqrt(this.size) * (col / (int) Math.sqrt(this.size))
-                        + i % (int) Math.sqrt(this.size);
-                if (this.board[subRow][subCol] == value) {
-                    return false;
-                }
-            }
-        }
-        return true;
+    private boolean isNumberInSubGrid(int row, int col, int value, int i) {
+        int subRow = (int) Math.sqrt(this.size) * (row / (int) Math.sqrt(this.size))
+                + i / (int) Math.sqrt(this.size);
+        int subCol = (int) Math.sqrt(this.size) * (col / (int) Math.sqrt(this.size))
+                + i % (int) Math.sqrt(this.size);
+        return this.board[subRow][subCol] == value;
     }
 
     public void printBoard() {
+
+        double repeatFactor = (this.size > 4 ? 2.8 : 3.3);
+
+        String divisionBar = "-".repeat((int) (this.size * repeatFactor));
+
+        System.out.print("\n"+divisionBar+"\n");
+
         for (int row = 0; row < this.size; row++) {
             if (row % Math.sqrt(this.size) == 0 && row != 0) {
-                System.out.print("+");
-                for (int i = 0; i < this.size; i++) {
-                    System.out.print("-");
-                }
-                System.out.println("+");
+                System.out.print(divisionBar+"\n");
             }
             for (int col = 0; col < this.size; col++) {
                 if (col % Math.sqrt(this.size) == 0 && col != 0) {
                     System.out.print("| ");
                 }
-                System.out.print(this.board[row][col] + " ");
+                if(col == 0) {
+                    System.out.print("| "+this.board[row][col] + " ");
+                } else if (col == this.size - 1) {
+                    System.out.print(this.board[row][col] + " |");
+                } else {
+                    System.out.print(this.board[row][col] + " ");
+                }
             }
             System.out.println();
         }
+        System.out.print(divisionBar+"\n");
+    }
+
+    public String convertBoardIntoString() {
+
+        double repeatFactor = (this.size > 4 ? 2.8 : 3.3);
+
+        String divisionBar = "-".repeat((int) (this.size * repeatFactor));
+
+        String divisionBarWithBreakLine = "\n" + divisionBar + "\n";
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(divisionBarWithBreakLine);
+
+
+        for (int row = 0; row < this.size; row++) {
+            if (row % Math.sqrt(this.size) == 0 && row != 0) {
+                sb.append(divisionBar+"\n");
+            }
+            for (int col = 0; col < this.size; col++) {
+                if (col % Math.sqrt(this.size) == 0 && col != 0) {
+                    sb.append("| ");
+                }
+                if(col == 0) {
+                    sb.append("| "+this.board[row][col] + " ");
+                } else if (col == this.size - 1) {
+                    sb.append(this.board[row][col] + " |");
+                } else {
+                    sb.append(this.board[row][col] + " ");
+                }
+            }
+            sb.append("\n");
+        }
+        sb.append(divisionBar+"\n");
+
+        this.stringBoard = sb.toString();
+
+        return sb.toString();
     }
 
     private int[] getNextEmptyCell() {
         for (int i = 0; i < this.size; i++) {
             for (int j = 0; j < this.size; j++) {
                 if (this.board[i][j] == 0) {
-                    int[] nextEmptyCell = { i, j };
 
-                    return nextEmptyCell;
+                    return new int[]{ i, j };
                 }
             }
         }
@@ -254,9 +281,6 @@ public class SudokuBoard implements Cloneable {
             if (this.isValidMove(row, col, value)) {
                 SudokuBoard newSu = (SudokuBoard) this.clone();
                 newSu.board[row][col] = value;
-                // System.out.println("\n+++++++++++++");
-                // newSu.printBoard();
-                // System.out.println("+++++++++++++");
                 newSus.add(newSu);
             }
         }
@@ -271,26 +295,12 @@ public class SudokuBoard implements Cloneable {
         int[][] board = new int[cloned.size][cloned.size];
 
         for (int i = 0; i < cloned.size; i++) {
-            for (int j = 0; j < cloned.size; j++) {
-                board[i][j] = this.board[i][j];
-            }
+            System.arraycopy(this.board[i], 0, board[i], 0, cloned.size);
         }
 
         cloned.board = board;
 
         return cloned;
-    }
-
-    public boolean isComplete() {
-        // Verifica se todas as células foram preenchidas
-        for (int row = 0; row < this.size; row++) {
-            for (int col = 0; col < this.size; col++) {
-                if (this.board[row][col] == 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     public boolean isSolution() {
@@ -307,5 +317,222 @@ public class SudokuBoard implements Cloneable {
         }
 
         return true;
+    }
+
+    public int calculateCostOfRepeatedNumbersInRowColumnOrSubGrid(int[][] board) {
+        int cost = 0;
+
+        cost = getCostOfRepeatedNumbersInRow(board, cost);
+
+        cost = getCostOfRepeatedNumbersInColumn(board, cost);
+
+        if(isComplexBoard()) {
+            cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
+
+        }
+
+        return cost;
+    }
+
+    public int calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(int[][] board) {
+        int cost = 0;
+
+        cost = getCostOfRepeatedNumbersInRow(board, cost);
+
+        cost = getCostOfRepeatedNumbersInColumn(board, cost);
+
+        cost = getCostOfEmptyCells(board, cost);
+
+        if(isComplexBoard()) {
+            cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
+        }
+
+        return cost;
+    }
+
+    private int getCostOfRepeatedNumbersInSubGrid(int[][] board,int cost) {
+        int boardSize = board.length;
+        int regionSize = boardSize == 9 ? 3 : 2;
+
+        for (int i = 0; i < boardSize; i += regionSize) {
+            for (int j = 0; j < boardSize; j += regionSize) {
+                int[] counts = new int[boardSize + 1];
+                for (int k = 0; k < regionSize; k++) {
+                    for (int l = 0; l < regionSize; l++) {
+                        counts[board[i + k][j + l]]++;
+                    }
+                }
+                for (int k = 1; k <= boardSize; k++) {
+                    cost += counts[k] > 1 ? counts[k] - 1 : 0;
+                }
+            }
+        }
+        return cost;
+    }
+
+    private int getCostOfRepeatedNumbersInRow(int[][] board, int cost) {
+        int length = board.length;
+        for (int[] ints : board) {
+            int[] counts = new int[length + 1];
+            for (int j = 0; j < length; j++) {
+                counts[ints[j]]++;
+            }
+            for (int j = 1; j <= length; j++) {
+                cost += counts[j] > 1 ? counts[j] - 1 : 0;
+            }
+        }
+        return cost;
+    }
+
+    private int getCostOfRepeatedNumbersInColumn(int[][] board, int cost) {
+        int boardSize = board.length;
+        for (int j = 0; j < boardSize; j++) {
+            int[] counts = new int[boardSize + 1];
+            for (int[] ints : board) {
+                counts[ints[j]]++;
+            }
+            for (int i = 1; i <= boardSize; i++) {
+                cost += counts[i] > 1 ? counts[i] - 1 : 0;
+            }
+        }
+        return cost;
+    }
+
+    private int getCostOfEmptyCells(int[][] board, int cost) {
+        int boardSize = board.length;
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if(board[i][j] == 0) {
+                    cost += 1;
+                }
+            }
+        }
+        return cost;
+    }
+
+    public int[][] perturbBoard() {
+        Random random = new Random();
+
+        int boardSize = board.length;
+        int[][] newBoard = new int[boardSize][boardSize];
+        copyBoard(this.board, newBoard);
+
+        int row = random.nextInt(boardSize);
+        int col = random.nextInt(boardSize);
+        int value = random.nextInt(boardSize) + 1;
+        newBoard[row][col] = value;
+
+        return newBoard;
+    }
+
+    public int[][] perturbBoardForHillClimbing(int row, int column) {
+        Random random = new Random();
+
+        int boardSize = board.length;
+        int[][] newBoard = new int[boardSize][boardSize];
+        copyBoard(this.board, newBoard);
+
+        int value = random.nextInt(boardSize) + 1;
+
+        if(isValidMove(row, column, value)) {
+            newBoard[row][column] = value;
+
+            return newBoard;
+        }
+
+        return newBoard;
+    }
+
+    public boolean acceptPerturbedSolution(int newCost, int oldCost, double temperature) {
+        Random random = new Random();
+
+        if (newCost < oldCost) {
+            return true;
+        }
+        double probability = Math.exp(-(newCost - oldCost) / temperature);
+        return random.nextDouble() < probability;
+    }
+
+    private static void copyBoard(int[][] source, int[][] dest) {
+        for (int i = 0; i < source.length; i++) {
+            System.arraycopy(source[i], 0, dest[i], 0, source.length);
+        }
+    }
+
+    public void initializeBoard() {
+        int boardSize = this.size;
+
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                board[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                int value;
+
+                Random random = new Random();
+                value = random.nextInt(boardSize) + 1;
+
+                if (isValidMove(i, j, value)) {
+                    board[i][j] = value;
+                }
+            }
+        }
+    }
+
+    public SudokuBoard initializeBoardRandomWay() {
+        int boardSize = this.size;
+
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                int value;
+
+                Random random = new Random();
+                value = random.nextInt(boardSize) + 1;
+
+                board[i][j] = value;
+            }
+        }
+        return this;
+    }
+
+    public CoordinateCell listOfCoordinatesOfCells() {
+        CoordinateCell coordinateCell= new CoordinateCell();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                if(board[i][j] != 0 || board[i][j] == 0) {
+                    Coordinate coordinate = new Coordinate();
+                    coordinate.row = i;
+                    coordinate.column = j;
+                    coordinateCell.coordinate.add(coordinate);
+                }
+            }
+        }
+        return coordinateCell;
+    }
+
+    public CoordinateCell listOfCoordinatesOfCellsThatAreEmpty() {
+        CoordinateCell coordinateCell= new CoordinateCell();
+
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                if(board[i][j] == 0) {
+                    Coordinate coordinate = new Coordinate();
+                    coordinate.row = i;
+                    coordinate.column = j;
+                    coordinateCell.coordinate.add(coordinate);
+                }
+            }
+        }
+        return coordinateCell;
+    }
+
+    @Override
+    public String toString() {
+
+        return convertBoardIntoString();
     }
 }

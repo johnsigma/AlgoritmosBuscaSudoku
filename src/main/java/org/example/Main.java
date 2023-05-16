@@ -1,44 +1,245 @@
 package org.example;
 
-import java.io.IOException;
+import org.example.response.SudokuResponse;
 
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Random;
+import java.util.Scanner;
+
 public class Main {
+
+
     public static void main(String[] args) throws IOException, CloneNotSupportedException {
-        FileHandler fh = new FileHandler();
-        String path = "C:\\Users\\johnv\\IdeaProjects\\Trabalho1IA\\src\\main\\resources\\su3.txt";
-        Tuple tuple = fh.readFile(path);
+
+        Search search = new Search();
+
+        SudokuBoard sudokuBoardResult;
+
+        long start, finish, timeElapsed;
+
+        SudokuBoard sudokuBoard;
+        Type type;
+        String fileName;
+        int option;
+
+        Random random = new Random();
+        do {
+            menu();
+            Scanner input = new Scanner(System.in);
+            option = input.nextInt();
+            switch (option) {
+                case 1 -> {
+                    System.out.println("Busca Profundidade Iterativa:");
+
+                    type = chooseSudokuType(input);
+
+                    System.out.println("Entre com o nome do arquivo do jogo sudoku:");
+                    fileName = input.next();
+
+                    sudokuBoard = readSudokuGameFromFile(fileName, type);
+
+                    System.out.println("-----------Tabuleiro inicial------------");
+                    System.out.println("Nível do jogo: " + (type.equals(Type.COMPLEX) ? "COMPLEXO" : "SIMPLES"));
+                    sudokuBoard.printBoard();
+
+                    start = System.currentTimeMillis();
+
+                    SudokuResponse sudokuResponse;
+
+                    sudokuResponse = search.iterativeDepthSearch(10000, sudokuBoard);
+
+                    finish = System.currentTimeMillis();
+                    timeElapsed = finish - start;
+
+                    System.out.println("-----------Tabuleiro final------------");
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
+
+                    System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Busca-Profundidade-Iterativa-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
+
+                }
+                case 2 -> {
+                    System.out.println("Greedy 1:");
+
+                    type = chooseSudokuType(input);
+
+                    System.out.println("Entre com o nome do arquivo do jogo sudoku:");
+                    fileName = input.next();
+
+                    sudokuBoard = readSudokuGameFromFile(fileName, type);
+
+                    System.out.println("-----------Tabuleiro inicial------------");
+                    System.out.println("Nível do jogo: " + (type.equals(Type.COMPLEX) ? "COMPLEXO" : "SIMPLES"));
+
+                    sudokuBoard.printBoard();
+
+                    start = System.currentTimeMillis();
+                    SudokuResponse sudokuResponse;
+
+                    sudokuResponse = search.greedySearch(sudokuBoard);
+
+                    //System.out.println("\nGreedy 2:");
+                    //sudokuResponse = search.greedySearch2(sudokuBoard);
+
+                    finish = System.currentTimeMillis();
+                    timeElapsed = finish - start;
+
+                    System.out.println("-----------Tabuleiro final------------");
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
+                    System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Busca-Gulosa-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
+                }
+                case 3 -> {
+                    System.out.println("A*:");
+                    type = chooseSudokuType(input);
+                    System.out.println("Entre com o nome do arquivo do jogo sudoku:");
+                    fileName = input.next();
+                    sudokuBoard = readSudokuGameFromFile(fileName, type);
+                    System.out.println("Nível do jogo: " + (type.equals(Type.COMPLEX) ? "COMPLEXO" : "SIMPLES"));
+                    System.out.println("-----------Tabuleiro inicial------------");
+                    sudokuBoard.printBoard();
+                    start = System.currentTimeMillis();
+
+                    SudokuResponse sudokuResponse = new SudokuResponse();
+
+                    //sudokuResponse = search.aStar(sudokuBoard); (implementar essa funcao))
+
+                    finish = System.currentTimeMillis();
+                    timeElapsed = finish - start;
+
+                    System.out.println("-----------Tabuleiro final------------");
+                    sudokuBoard.printBoard();
+                    System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
+                }
+                case 4 -> {
+                    System.out.println("Subida de Encosta com Movimentos Laterais: ");
+
+                    type = chooseSudokuType(input);
+
+                    System.out.println("Entre com o nome do arquivo do jogo sudoku:");
+                    fileName = input.next();
+
+                    sudokuBoard = readSudokuGameFromFile(fileName, type);
+
+                    System.out.println("Nível do jogo: " + (type.equals(Type.COMPLEX) ? "COMPLEXO" : "SIMPLES"));
+
+                    System.out.println("-----------Tabuleiro inicial------------");
+                    sudokuBoard.printBoard();
+
+                    start = System.currentTimeMillis();
+                    SudokuResponse sudokuResponse;
+
+                    sudokuResponse = search.hillClimbingWithLateralMoves(sudokuBoard);
+
+                    finish = System.currentTimeMillis();
+                    timeElapsed = finish - start;
+
+                    System.out.println("-----------Tabuleiro final------------");
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
+                    System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
+
+                }
+                case 5 -> {
+                    System.out.println("\nTêmpera simulada: ");
+
+                    type = chooseSudokuType(input);
+
+                    System.out.println("Entre com o nome do arquivo do jogo sudoku:");
+                    fileName = input.next();
+
+                    sudokuBoard = readSudokuGameFromFile(fileName, type);
+
+                    System.out.println("Nível do jogo: " + (type.equals(Type.COMPLEX) ? "COMPLEXO" : "SIMPLES"));
+
+                    System.out.println("-----------Tabuleiro inicial------------");
+                    sudokuBoard.printBoard();
+
+                    start = System.currentTimeMillis();
+
+                    SudokuResponse sudokuResponse;
+
+                    sudokuResponse = search.simulatedAnnealing(sudokuBoard);
+
+                    finish = System.currentTimeMillis();
+                    timeElapsed = finish - start;
+
+                    System.out.println("-----------Tabuleiro final------------");
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
+                    System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Têmpera-Simulada-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
+                }
+            }
+        } while(option != 6);
+
+    }
+
+    private static SudokuBoard readSudokuGameFromFile(String fileName, Type type) throws IOException {
+
+        Tuple tuple = FileHandler.readFile(fileName);
 
         String strTable = tuple.strTable;
         int n = tuple.numberOfLines;
 
-        SudokuBoard su = new SudokuBoard(n);
-        su.populateBoardByTxtFile(strTable);
-        System.out.println("-----------Tabuleiro inicial------------");
-        su.printBoard();
 
-        // System.out.println(su.isSolution());
+        SudokuBoard sudokuBoard = new SudokuBoard(n, type);
+        sudokuBoard.populateBoardByTxtFile(strTable);
 
-        Search search = new Search();
+        return sudokuBoard;
+    }
 
-        SudokuBoard suResult = null;
+    private static Type chooseSudokuType(Scanner input) {
+        System.out.println("Escolha o método de resolução (COMPLEXO/SIMPLES):");
+        System.out.println("1: SIMPLES");
+        System.out.println("2: COMPLEXO");
 
-        System.out.println("\nGreedy 1:");
-        suResult = search.greedySearch(su);
-        suResult.printBoard();
-        System.out.println("\nGreedy 2:");
-        suResult = search.greedySearch2(su);
-        //suResult = search.iterativeDepthSearch(10000, su);
-        System.out.println("\nProfundidade:");
-        suResult = search.depthLimitedSearch(10000, su);
+        int subOption = input.nextInt();
+        if (subOption == 2) {
+            return Type.COMPLEX;
+        }
+        return Type.SIMPLE;
+    }
 
-        System.out.println("\nA*:");
-        suResult = search.aStarSearch(su);
-        suResult.printBoard();
 
-        // System.out.println("\n\n\n\n-----------Tabuleiro Final------------");
-        // suResult.printBoard();
-
+    private static void menu() {
+        System.out.println("Resolução do jogo Sudoku com algoritmos de Inteligência Artificial\n");
+        System.out.println("Escolha a opção que deseja resolver o jogo:\n");
+        System.out.println("1- Busca em profundidade iterativa\n");
+        System.out.println("2- Busca gulosa\n");
+        System.out.println("3- Busca A*\n");
+        System.out.println("4- Subida de Encosta com Movimentos Laterais\n");
+        System.out.println("5- Têmpera Simulada\n");
+        System.out.println("6- Sair\n");
     }
 }

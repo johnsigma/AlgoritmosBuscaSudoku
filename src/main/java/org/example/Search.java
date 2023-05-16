@@ -9,48 +9,50 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
+import org.example.response.SudokuResponse;
+
+import java.util.*;
 
 public class Search {
 
-    int numberOfSteps = 0;
+    private static final int SIMULATED_ANNEALING_MAX_MOVES = 1000;
+    private static final double SIMULATED_ANNEALING_INITIAL_TEMPERATURE = 1.0;
+    private static final double SIMULATED_ANNEALING_COOLING_FACTOR = 0.95;
+    private static final double SIMULATED_ANNEALING_FINAL_TEMPERATURE = 0.0001;
+    private static final int HILL_CLIMBING_MAX_ITERATIONS = 100000;
+    private static final int MAX_MOVES_WITHOUT_IMPROVEMENT = 1000;
 
     Search() {
 
     }
 
-    public SudokuBoard iterativeDepthSearch(int limit, SudokuBoard su) throws CloneNotSupportedException {
+    public SudokuResponse iterativeDepthSearch(int limit, SudokuBoard su) throws CloneNotSupportedException {
+        SudokuResponse sudokuResponse = new SudokuResponse();
+        List<SudokuBoard> steps = new ArrayList<>();
+        steps.add(su);
+        sudokuResponse.setSteps(steps);
 
         if (su.isSolution())
-            return su;
-
-        SudokuBoard result = null;
+            return sudokuResponse;
 
         for (int depth = 1; depth <= limit; depth++) {
 
             System.out.println("\nIteração: " + depth);
 
-            result = this.depthLimitedSearch(depth, su);
+            sudokuResponse = this.depthLimitedSearch(depth, su, sudokuResponse);
 
-            // System.out.println("\n----------");
-            // result.printBoard();
-            // System.out.println("----------");
-
-            // System.out.println(depth);
-
-            if (result.isSolution()) {
+            if (sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).isSolution()) {
                 System.out.println("Solução encontrada com profundidade " + depth);
-                return result;
+                break;
             }
-
         }
 
-        return result;
+        return sudokuResponse;
     }
 
     public void setHeuristics(ArrayList<SudokuBoard> sus) {
-
-        for (int i = 0; i < sus.size(); i++) {
-            sus.get(i).setHeuristic();
+        for (SudokuBoard sudokuBoard : sus) {
+            sudokuBoard.setHeuristic();
         }
     }
 
@@ -99,6 +101,74 @@ public class Search {
         if (!isAdded) {
             list.add(su);
         }
+    }
+
+    public SudokuResponse greedySearch(SudokuBoard su) throws CloneNotSupportedException {
+        SudokuBoard selected_su;
+        su.setHeuristic();
+
+        int numberOfSteps = 0;
+
+        ArrayList<SudokuBoard> stack = new ArrayList<>();
+        stack.add(su);
+
+        ArrayList<SudokuBoard> visitedNodes = new ArrayList<>();
+
+        ArrayList<SudokuBoard> exploredNodes = new ArrayList<>();
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
+
+        while (true) {
+
+            numberOfSteps++;
+
+            if (stack.size() == 0) {
+                System.out.println("Solução não encontrada!");
+                break;
+            }
+
+            selected_su = stack.get(0);
+
+            stack.remove(0);
+
+            visitedNodes.add(selected_su);
+
+            if (selected_su.isSolution()) {
+                System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
+                        + exploredNodes.size() + " nós.");
+                sudokuResponse.setDepth(String.valueOf(numberOfSteps));
+                break;
+            }
+
+            ArrayList<SudokuBoard> new_sus = selected_su.extendBoard();
+
+            if (new_sus == null)
+                continue;
+
+            if (new_sus.size() > 0) {
+
+                exploredNodes.add(selected_su);
+
+                this.setHeuristics2(new_sus);
+
+                Collections.sort(new_sus, Comparator.comparing(SudokuBoard::getHeuristicCost));
+
+                for (SudokuBoard newSus : new_sus) {
+                    if (!stack.contains(newSus) && !visitedNodes.contains(newSus)) {
+                        this.addInOrderToList(stack, newSus);
+                    }
+                }
+            }
+        }
+
+        sudokuResponse.setResolutionMethod("Busca gulosa de implementação '1' de tamanho "+su.board.length+"x"+su.board.length);
+        sudokuResponse.setSteps(visitedNodes);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedNodes.size()));
+        sudokuResponse.setQuantityExploredNodes(String.valueOf(exploredNodes.size()));
+        sudokuResponse.setComplexity(su.getSudokuBoardType().name());
+
+        return sudokuResponse;
+
     }
 
     public SudokuBoard aStarSearch(SudokuBoard initialBoard) throws CloneNotSupportedException {
@@ -178,8 +248,8 @@ public class Search {
         return null; // Nenhuma solução encontrada
     }
 
-    public SudokuBoard greedySearch(SudokuBoard su) throws CloneNotSupportedException {
-        SudokuBoard selected_su = null;
+    public SudokuResponse greedySearch2(SudokuBoard su) throws CloneNotSupportedException {
+        SudokuBoard selected_su;
         su.setHeuristic();
 
         int numberOfSteps = 0;
@@ -187,29 +257,15 @@ public class Search {
         ArrayList<SudokuBoard> stack = new ArrayList<>();
         stack.add(su);
 
-        ArrayList<SudokuBoard> checkedSus = new ArrayList<>();
+        ArrayList<SudokuBoard> visitedNodes = new ArrayList<>();
 
-        ArrayList<SudokuBoard> exploredSus = new ArrayList<>();
+        ArrayList<SudokuBoard> exploredNodes = new ArrayList<>();
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
 
         while (true) {
 
             numberOfSteps++;
-
-            // System.out.println("Profundidade: " + numberOfSteps);
-
-            // System.out.println("\nHeurísticas:");
-
-            // for (SudokuBoard suAux : stack) {
-            // System.out.println(suAux.getHeuristicCost());
-            // }
-
-            // System.out.println("\nEstados:");
-
-            // for (SudokuBoard suAux : stack) {
-            // System.out.println("\n+++++++++++++");
-            // suAux.printBoard();
-            // System.out.println("\n+++++++++++++");
-            // }
 
             if (stack.size() == 0) {
                 System.out.println("Solução não encontrada!");
@@ -220,97 +276,15 @@ public class Search {
 
             stack.remove(0);
 
-            checkedSus.add(selected_su);
+            visitedNodes.add(selected_su);
 
             if (selected_su.isSolution()) {
                 System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
-                        + exploredSus.size() + " nós.");
-                // for (SudokuBoard suAux : exploredSus) {
-                // suAux.printBoard();
-                // System.out.println("\n");
-                // }
-                return selected_su;
-            }
-
-            ArrayList<SudokuBoard> new_sus = selected_su.extendBoard();
-
-            if (new_sus == null)
-                continue;
-
-            if (new_sus.size() > 0) {
-
-                exploredSus.add(selected_su);
-
-                this.setHeuristics2(new_sus);
-
-                Collections.sort(new_sus, Comparator.comparing(SudokuBoard::getHeuristicCost));
-
-                for (int i = 0; i < new_sus.size(); i++) {
-                    if (!stack.contains(new_sus.get(i)) && !checkedSus.contains(new_sus.get(i))) {
-                        this.addInOrderToList(stack, new_sus.get(i));
-                    }
-                }
-            }
-        }
-
-        return selected_su;
-
-    }
-
-    public SudokuBoard greedySearch2(SudokuBoard su) throws CloneNotSupportedException {
-        SudokuBoard selected_su = null;
-        su.setHeuristic();
-
-        int numberOfSteps = 0;
-
-        ArrayList<SudokuBoard> stack = new ArrayList<>();
-        stack.add(su);
-
-        ArrayList<SudokuBoard> checkedSus = new ArrayList<>();
-
-        ArrayList<SudokuBoard> exploredSus = new ArrayList<>();
-
-        while (true) {
-
-            numberOfSteps++;
-
-            // System.out.println("Profundidade: " + numberOfSteps);
-
-            // System.out.println("\nHeurísticas:");
-
-            // for (SudokuBoard suAux : stack) {
-            // System.out.println(suAux.getHeuristicCost());
-            // }
-
-            // System.out.println("\nEstados:");
-
-            // for (SudokuBoard suAux : stack) {
-            // System.out.println("\n+++++++++++++");
-            // suAux.printBoard();
-            // System.out.println("\n+++++++++++++");
-            // }
-
-            if (stack.size() == 0) {
-                System.out.println("Solução não encontrada!");
+                        + exploredNodes.size() + " nós.");
+                sudokuResponse.setDepth(String.valueOf(numberOfSteps));
                 break;
             }
 
-            selected_su = stack.get(0);
-
-            stack.remove(0);
-
-            checkedSus.add(selected_su);
-
-            if (selected_su.isSolution()) {
-                System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
-                        + exploredSus.size() + " nós.");
-                // for (SudokuBoard suAux : exploredSus) {
-                // suAux.printBoard();
-                // System.out.println("\n");
-                // }
-                return selected_su;
-            }
-
             ArrayList<SudokuBoard> new_sus = selected_su.extendBoard();
 
             if (new_sus == null)
@@ -318,38 +292,40 @@ public class Search {
 
             if (new_sus.size() > 0) {
 
-                exploredSus.add(selected_su);
+                exploredNodes.add(selected_su);
 
                 this.setHeuristics(new_sus);
 
                 Collections.sort(new_sus, Comparator.comparing(SudokuBoard::getHeuristicCost));
 
-                for (int i = 0; i < new_sus.size(); i++) {
-                    if (!stack.contains(new_sus.get(i)) && !checkedSus.contains(new_sus.get(i))) {
-                        this.addInOrderToList(stack, new_sus.get(i));
+                for (SudokuBoard newSus : new_sus) {
+                    if (!stack.contains(newSus) && !visitedNodes.contains(newSus)) {
+                        this.addInOrderToList(stack, newSus);
                     }
                 }
             }
         }
 
-        return selected_su;
+        sudokuResponse.setResolutionMethod("Busca gulosa de implementação '2' de tamanho "+su.board.length+"x"+su.board.length);
+        sudokuResponse.setSteps(visitedNodes);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedNodes.size()));
+        sudokuResponse.setQuantityExploredNodes(String.valueOf(exploredNodes.size()));
+        sudokuResponse.setComplexity(su.getSudokuBoardType().name());
 
+        return sudokuResponse;
     }
 
-    public SudokuBoard depthLimitedSearch(int depth, SudokuBoard su) throws CloneNotSupportedException {
+    public SudokuResponse depthLimitedSearch(int depth, SudokuBoard su, SudokuResponse sudokuResponse) throws CloneNotSupportedException {
 
-        SudokuBoard selected_su = null;
+        SudokuBoard selectedSudokuBoard;
 
         int numberOfSteps = 0;
-
-        // Stack<Cell> stack = new Stack<>();
-        // stack.push(new Cell(0,0));
 
         Stack<SudokuBoard> stack = new Stack<>();
         stack.push(su);
 
-        ArrayList<SudokuBoard> checkedSus = new ArrayList<>();
-        ArrayList<SudokuBoard> exploredSus = new ArrayList<>();
+        ArrayList<SudokuBoard> visitedSudokuBoardNode = new ArrayList<>();
+        ArrayList<SudokuBoard> exploredSudokuBoardNodes = new ArrayList<>();
 
         while (numberOfSteps < depth) {
 
@@ -360,145 +336,240 @@ public class Search {
                 break;
             }
 
-            selected_su = stack.pop();
+            selectedSudokuBoard = stack.pop();
 
-            checkedSus.add(selected_su);
+            visitedSudokuBoardNode.add(selectedSudokuBoard);
 
-            if (selected_su.isSolution()) {
+            if (selectedSudokuBoard.isSolution()) {
                 System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
-                        + exploredSus.size() + " nós.");
-                // for (SudokuBoard suAux : exploredSus) {
-                // suAux.printBoard();
-                // System.out.println("\n");
-                // }
-                return selected_su;
+                        + exploredSudokuBoardNodes.size() + " nós.");
+                sudokuResponse.setDepth(String.valueOf(numberOfSteps));
+                break;
             }
 
-            ArrayList<SudokuBoard> new_sus = selected_su.extendBoard();
+            ArrayList<SudokuBoard> newSudokuBoardNodesExtendedFromActualNode = selectedSudokuBoard.extendBoard();
 
-            if (new_sus == null)
+            if (newSudokuBoardNodesExtendedFromActualNode == null)
                 continue;
 
-            if (new_sus.size() > 0) {
-                exploredSus.add(selected_su);
-                for (int i = new_sus.size() - 1; i >= 0; i--) {
+            addExpandedNodesThatWasNotVisitedIntoStack(selectedSudokuBoard, stack, visitedSudokuBoardNode, exploredSudokuBoardNodes, newSudokuBoardNodesExtendedFromActualNode);
+        }
 
-                    // System.out.println("\nStack");
-                    // for(int n = 0; n < stack.size(); n++) {
-                    // stack.get(n).printBoard();
-                    // }
-                    //
-                    // System.out.println("\nChecked");
-                    // for(int n = 0; n < checkedSus.size(); n++) {
-                    // checkedSus.get(n).printBoard();
-                    // }
+        sudokuResponse.setResolutionMethod("Busca em profundidade Iterativa "+su.board.length+"x"+su.board.length);
+        sudokuResponse.setSteps(visitedSudokuBoardNode);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedSudokuBoardNode.size()));
+        sudokuResponse.setQuantityExploredNodes(String.valueOf(exploredSudokuBoardNodes.size()));
+        sudokuResponse.setComplexity(su.getSudokuBoardType().name());
 
-                    // ArrayList<SudokuBoard> arrayStack = new ArrayList(stack);
-                    //
-                    // if(!this.boardIsContainedInList(new_sus.get(i).board, arrayStack) &&
-                    // !this.boardIsContainedInList(new_sus.get(i).board, checkedSus)) {
-                    // System.out.println("\n\n+++++++++++++");
-                    // new_sus.get(i).printBoard();
-                    // System.out.println("\n+++++++++++++");
-                    // stack.push(new_sus.get(i));
-                    // }
+        return sudokuResponse;
 
-                    if (!stack.contains(new_sus.get(i)) && !checkedSus.contains(new_sus.get(i))) {
-                        stack.push(new_sus.get(i));
+    }
+
+    private static void addExpandedNodesThatWasNotVisitedIntoStack(SudokuBoard selectedSudokuBoard, Stack<SudokuBoard> stack, ArrayList<SudokuBoard> visitedSudokuBoardNode, ArrayList<SudokuBoard> exploredSudokuBoardNodes, ArrayList<SudokuBoard> newSudokuBoardNodesExtendedFromActualNode) {
+        if (newSudokuBoardNodesExtendedFromActualNode.size() > 0) {
+            exploredSudokuBoardNodes.add(selectedSudokuBoard);
+            for (int i = newSudokuBoardNodesExtendedFromActualNode.size() - 1; i >= 0; i--) {
+                if (!stack.contains(newSudokuBoardNodesExtendedFromActualNode.get(i)) && !visitedSudokuBoardNode.contains(newSudokuBoardNodesExtendedFromActualNode.get(i))) {
+                    stack.push(newSudokuBoardNodesExtendedFromActualNode.get(i));
+                }
+            }
+        }
+    }
+
+
+    public SudokuResponse simulatedAnnealing(SudokuBoard sudokuBoard) {
+        int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+        int initialCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+        double temperature = SIMULATED_ANNEALING_INITIAL_TEMPERATURE;
+
+        int visitedNodes = 0;
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
+        sudokuResponse.setInitialTemperature(String.valueOf(temperature));
+
+        List<SudokuBoard> steps = new ArrayList<>();
+
+        SudokuBoard firstBoardVersion = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+        firstBoardVersion.board = sudokuBoard.board;
+        firstBoardVersion.size = sudokuBoard.size;
+
+        steps.add(firstBoardVersion);
+
+        boolean isSolution = false;
+
+        while (!sudokuBoard.isSolution() && temperature > SIMULATED_ANNEALING_FINAL_TEMPERATURE) {
+            for (int i = 0; i < SIMULATED_ANNEALING_MAX_MOVES; i++) {
+                int[][] newBoard = sudokuBoard.perturbBoard();
+                int newCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
+                if (sudokuBoard.acceptPerturbedSolution(newCost, currentCost, temperature)) {
+
+                    if(sudokuBoard.isSolution()) {
+                        break;
+                    }
+
+                    SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+
+                    sudokuBoard.board = newBoard;
+
+                    sudokuBoardCopy.board = sudokuBoard.board;
+                    sudokuBoardCopy.size = sudokuBoard.size;
+                    sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
+
+                    steps.add(sudokuBoardCopy);
+                    visitedNodes++;
+
+                    currentCost = newCost;
+                }
+            }
+            temperature *= SIMULATED_ANNEALING_COOLING_FACTOR;
+        }
+
+        int finalCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+        sudokuResponse.setFinalTemperature(String.valueOf(temperature));
+
+        sudokuResponse.setResolutionMethod("Têmpera Simulada de tamanho "+sudokuBoard.board.length+"x"+sudokuBoard.board.length);
+        sudokuResponse.setFinalCost(String.valueOf(finalCost));
+        sudokuResponse.setInitialCost(String.valueOf(initialCost));
+        sudokuResponse.setSteps(steps);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedNodes));
+        sudokuResponse.setComplexity(sudokuBoard.getSudokuBoardType().name());
+
+        return sudokuResponse;
+    }
+
+    public SudokuResponse hillClimbingWithLateralMoves(SudokuBoard sudokuBoard) {
+        int quantityOfLateralMoves = 0;
+        boolean foundBetterCostBoard;
+        int maxIterations = 0;
+
+        int row, column;
+        Random random = new Random();
+
+        int visitedNodes = 0;
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
+        List<SudokuBoard> steps = new ArrayList<>();
+
+        SudokuBoard firstBoardVersion = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+        firstBoardVersion.board = sudokuBoard.board;
+        firstBoardVersion.size = sudokuBoard.size;
+        int initialCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+        steps.add(firstBoardVersion);
+        int costOriginalBoard, neighborCost;
+        while (!sudokuBoard.isSolution() && maxIterations < HILL_CLIMBING_MAX_ITERATIONS) {
+
+            CoordinateCell coordinateEmptyCells = sudokuBoard.listOfCoordinatesOfCellsThatAreEmpty();
+
+            Coordinate randomEmptyCell = coordinateEmptyCells.coordinate.get(random.nextInt(coordinateEmptyCells.coordinate.size()));
+
+            row = randomEmptyCell.row;
+            column = randomEmptyCell.column;
+            foundBetterCostBoard = false;
+
+            SudokuBoard neighborBoard = new SudokuBoard(sudokuBoard.board.length, sudokuBoard.getSudokuBoardType());
+            neighborBoard.board = sudokuBoard.board;
+            neighborBoard.size = sudokuBoard.size;
+
+            int[][] newBoard = neighborBoard.perturbBoardForHillClimbing(row, column);
+
+            neighborCost = neighborBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
+            costOriginalBoard = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+            if (neighborCost < costOriginalBoard) {
+
+                SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+
+                sudokuBoard.board = newBoard;
+
+                sudokuBoardCopy.board = sudokuBoard.board;
+                sudokuBoardCopy.size = sudokuBoard.size;
+                sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
+
+                steps.add(sudokuBoardCopy);
+                visitedNodes++;
+
+                foundBetterCostBoard = true;
+            }
+
+            if(!foundBetterCostBoard) {
+                while (true)  {
+
+
+                    newBoard = new int[sudokuBoard.board.length][sudokuBoard.board.length];
+
+                    copyBoard(sudokuBoard.board, newBoard);
+
+                    CoordinateCell coordinateCell = sudokuBoard.listOfCoordinatesOfCells();
+
+                    Coordinate first = coordinateCell.coordinate.get(random.nextInt(coordinateCell.coordinate.size()));
+                    Coordinate second = coordinateCell.coordinate.get(random.nextInt(coordinateCell.coordinate.size()));
+
+                    int firstValueTemp, secondValueTemp;
+
+                    int firstRow = first.row;
+                    int firstColumn = first.column;
+                    int secondRow = second.row;
+                    int secondColumn = second.column;
+
+
+                    firstValueTemp = newBoard[firstRow][firstColumn];
+                    secondValueTemp = newBoard[secondRow][secondColumn];
+
+                    newBoard[firstRow][firstColumn] = secondValueTemp;
+                    newBoard[secondRow][secondColumn] = firstValueTemp;
+
+                    int costNeighborThatHadLateralMove = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(newBoard);
+                    costOriginalBoard = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
+
+                    quantityOfLateralMoves++;
+                    if (costNeighborThatHadLateralMove <= costOriginalBoard) {
+
+                        SudokuBoard sudokuBoardCopy = new SudokuBoard(sudokuBoard.getSudokuBoardType());
+
+                        sudokuBoard.board = newBoard;
+
+                        sudokuBoardCopy.board = sudokuBoard.board;
+                        sudokuBoardCopy.size = sudokuBoard.size;
+                        sudokuBoardCopy.stringBoard = sudokuBoardCopy.convertBoardIntoString();
+
+                        steps.add(sudokuBoardCopy);
+                        visitedNodes++;
+
+                        quantityOfLateralMoves = 0;
+                        break;
+                    }
+
+                    if(quantityOfLateralMoves >= MAX_MOVES_WITHOUT_IMPROVEMENT) {
+                        quantityOfLateralMoves = 0;
+                        break;
                     }
                 }
             }
 
-            // Cell cell = stack.pop();
-            // int row = cell.row;
-            // int col = cell.col;
-            //
-            // if(su.board[row][col] == 0) {
-            //
-            // for(int value = previousSu.board[row][col] + 1; value <= su.size; value++) {
-            // if(su.isValidMove(row, col, value)) {
-            // su.board[row][col] = value;
-            //
-            // if(depth == 1 || su.isComplete()) {
-            // //return true;
-            // } else {
-            // Cell nextCell = this.getNextEmptyCell(row, col, su.board, su.size);
-            // stack.push(nextCell);
-            // break;
-            // }
-            // }
-            // }
-            // } else {
-            // Cell nextCell = this.getNextEmptyCell(row, col, su.board, su.size);
-            // stack.push(nextCell);
-            // }
+            maxIterations++;
+            System.out.println("Iterations: " + maxIterations);
+            sudokuBoard.printBoard();
         }
 
-        return selected_su;
+        int finalCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
 
+
+        sudokuResponse.setResolutionMethod("Subida Encosta com Movimentos Laterais de tamanho "+sudokuBoard.board.length+"x"+sudokuBoard.board.length);
+        sudokuResponse.setFinalCost(String.valueOf(finalCost));
+        sudokuResponse.setInitialCost(String.valueOf(initialCost));
+        sudokuResponse.setSteps(steps);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedNodes));
+        sudokuResponse.setComplexity(sudokuBoard.getSudokuBoardType().name());
+
+        return sudokuResponse;
     }
 
-    private boolean boardIsContainedInList(int[][] board, ArrayList<SudokuBoard> boardsList) {
-        for (int c = 0; c < boardsList.size(); c++) {
-            if (Arrays.equals(board, boardsList.get(c).board)) {
-                return true;
-            }
+    private static void copyBoard(int[][] source, int[][] dest) {
+        for (int i = 0; i < source.length; i++) {
+            System.arraycopy(source[i], 0, dest[i], 0, source.length);
         }
-
-        return false;
     }
 
-    private Cell getNextEmptyCell(int row, int col, int[][] board, int size) {
-        for (int i = row; i < size; i++) {
-            for (int j = (i == row) ? col + 1 : 0; j < size; j++) {
-                if (board[i][j] == 0) {
-                    Cell nextCell = new Cell(i, j);
-                    return nextCell;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    // public void IterativeDepthSearch(int limit, SudokuBoard board) {
-    //
-    // boolean solutionFound = false;
-    //
-    // for(int n = 0; n < limit; n++) {
-    //
-    // if(solutionFound) break;
-    //
-    // while(true) {
-    // this.numberOfSteps += 1;
-    //
-    // if(this.frontierIsEmpty()) {
-    // System.out.println("No solution found after " + this.numberOfSteps + "
-    // steps.");
-    // break;
-    // }
-    //
-    // Node selectedNode = this.removeFromFrontier();
-    //
-    // if(selectedNode.isTheSolution()) {
-    // System.out.println("Solution found after " + this.numberOfSteps + " steps.");
-    // System.out.println(selectedNode);
-    // solutionFound = true;
-    // break;
-    // }
-    //
-    // newNodes = selectedNode.extendNode();
-    //
-    // if(newNodes.length > 0) {
-    // for(int i = 0; i < newNodes.length; i++) {
-    // if(!this.frontier.contains(newNodes[i]) &&
-    // !this.checkedNodes.contains(newNodes[i])) {
-    // this.insertToFrontier(newNodes[i]);
-    // }
-    // }
-    // }
-    //
-    // }
-    // }
-    // }
 }
