@@ -4,6 +4,7 @@ import org.example.response.SudokuResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
@@ -22,13 +23,13 @@ public class Main {
         String fileName;
         int option;
 
+        Random random = new Random();
         do {
             menu();
             Scanner input = new Scanner(System.in);
             option = input.nextInt();
             switch (option) {
                 case 1 -> {
-                    //sudokuBoardResult = search.iterativeDepthSearch(10000, sudokuBoard);
                     System.out.println("Busca Profundidade Iterativa:");
 
                     type = chooseSudokuType(input);
@@ -44,7 +45,7 @@ public class Main {
 
                     start = System.currentTimeMillis();
 
-                    SudokuResponse sudokuResponse = new SudokuResponse();
+                    SudokuResponse sudokuResponse;
 
                     sudokuResponse = search.iterativeDepthSearch(10000, sudokuBoard);
                     //sudokuResponse = search.depthLimitedSearch(10000, sudokuBoard, sudokuResponse);
@@ -57,7 +58,9 @@ public class Main {
 
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
 
-                    String outputPath = "saida/".concat("Busca-Profundidade-Iterativa-"+ LocalDateTime.now()).concat(".txt");
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Busca-Profundidade-Iterativa-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
@@ -79,8 +82,9 @@ public class Main {
                     sudokuBoard.printBoard();
 
                     start = System.currentTimeMillis();
+                    SudokuResponse sudokuResponse;
 
-                    sudokuBoardResult = search.greedySearch(sudokuBoard);
+                    sudokuResponse = search.greedySearch(sudokuBoard);
 
                     //System.out.println("\nGreedy 2:");
                     //sudokuBoardResult = search.greedySearch2(sudokuBoard);
@@ -89,8 +93,15 @@ public class Main {
                     timeElapsed = finish - start;
 
                     System.out.println("-----------Tabuleiro final------------");
-                    sudokuBoardResult.printBoard();
+                    sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Busca-Gulosa-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+
+                    sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
+                    FileHandler.writeToFile(outputPath, sudokuResponse);
                 }
                 case 3 -> {
                     System.out.println("A*:");
@@ -139,7 +150,9 @@ public class Main {
                     sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
 
-                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now()).concat(".txt");
+                    int randomNumber = random.nextInt();
+
+                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
@@ -164,7 +177,6 @@ public class Main {
 
                     SudokuResponse sudokuResponse;
 
-                    //sudokuBoardResult = search.simulatedAnnealing(sudokuBoard);
                     sudokuResponse = search.simulatedAnnealing(sudokuBoard);
 
                     finish = System.currentTimeMillis();
@@ -173,8 +185,9 @@ public class Main {
                     System.out.println("-----------Tabuleiro final------------");
                     sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+                    int randomNumber = random.nextInt();
 
-                    String outputPath = "saida/".concat("Têmpera-Simulada-"+ LocalDateTime.now()).concat(".txt");
+                    String outputPath = "saida/".concat("Têmpera-Simulada-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);

@@ -80,7 +80,7 @@ public class Search {
         }
     }
 
-    public SudokuBoard greedySearch(SudokuBoard su) throws CloneNotSupportedException {
+    public SudokuResponse greedySearch(SudokuBoard su) throws CloneNotSupportedException {
         SudokuBoard selected_su = null;
         su.setHeuristic();
 
@@ -89,29 +89,15 @@ public class Search {
         ArrayList<SudokuBoard> stack = new ArrayList<>();
         stack.add(su);
 
-        ArrayList<SudokuBoard> checkedSus = new ArrayList<>();
+        ArrayList<SudokuBoard> visitedNodes = new ArrayList<>();
 
-        ArrayList<SudokuBoard> exploredSus = new ArrayList<>();
+        ArrayList<SudokuBoard> exploredNodes = new ArrayList<>();
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
 
         while (true) {
 
             numberOfSteps++;
-
-            // System.out.println("Profundidade: " + numberOfSteps);
-
-            // System.out.println("\nHeurísticas:");
-
-            // for (SudokuBoard suAux : stack) {
-            // System.out.println(suAux.getHeuristicCost());
-            // }
-
-            // System.out.println("\nEstados:");
-
-            // for (SudokuBoard suAux : stack) {
-            // System.out.println("\n+++++++++++++");
-            // suAux.printBoard();
-            // System.out.println("\n+++++++++++++");
-            // }
 
             if (stack.size() == 0) {
                 System.out.println("Solução não encontrada!");
@@ -122,16 +108,13 @@ public class Search {
 
             stack.remove(0);
 
-            checkedSus.add(selected_su);
+            visitedNodes.add(selected_su);
 
             if (selected_su.isSolution()) {
                 System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
-                        + exploredSus.size() + " nós.");
-                // for (SudokuBoard suAux : exploredSus) {
-                // suAux.printBoard();
-                // System.out.println("\n");
-                // }
-                return selected_su;
+                        + exploredNodes.size() + " nós.");
+                sudokuResponse.setDepth(String.valueOf(numberOfSteps));
+                break;
             }
 
             ArrayList<SudokuBoard> new_sus = selected_su.extendBoard();
@@ -141,21 +124,27 @@ public class Search {
 
             if (new_sus.size() > 0) {
 
-                exploredSus.add(selected_su);
+                exploredNodes.add(selected_su);
 
                 this.setHeuristics2(new_sus);
 
                 Collections.sort(new_sus, Comparator.comparing(SudokuBoard::getHeuristicCost));
 
-                for (int i = 0; i < new_sus.size(); i++) {
-                    if (!stack.contains(new_sus.get(i)) && !checkedSus.contains(new_sus.get(i))) {
-                        this.addInOrderToList(stack, new_sus.get(i));
+                for (SudokuBoard newSus : new_sus) {
+                    if (!stack.contains(newSus) && !visitedNodes.contains(newSus)) {
+                        this.addInOrderToList(stack, newSus);
                     }
                 }
             }
         }
 
-        return selected_su;
+        sudokuResponse.setResolutionMethod("Greedy 1: "+su.board.length+"x"+su.board.length);
+        sudokuResponse.setSteps(visitedNodes);
+        sudokuResponse.setQuantityOfVisitedNodes(String.valueOf(visitedNodes.size()));
+        sudokuResponse.setQuantityExploredNodes(String.valueOf(exploredNodes.size()));
+        sudokuResponse.setComplexity(su.getSudokuBoardType().name());
+
+        return sudokuResponse;
 
     }
 
