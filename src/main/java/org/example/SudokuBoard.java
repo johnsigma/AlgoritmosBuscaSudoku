@@ -230,25 +230,26 @@ public class SudokuBoard implements Cloneable {
 
         sb.append(divisionBarWithBreakLine);
 
+
         for (int row = 0; row < this.size; row++) {
             if (row % Math.sqrt(this.size) == 0 && row != 0) {
-                sb.append(divisionBar + "\n");
+                sb.append(divisionBar).append("\n");
             }
             for (int col = 0; col < this.size; col++) {
                 if (col % Math.sqrt(this.size) == 0 && col != 0) {
                     sb.append("| ");
                 }
-                if (col == 0) {
-                    sb.append("| " + this.board[row][col] + " ");
+                if(col == 0) {
+                    sb.append("| ").append(this.board[row][col]).append(" ");
                 } else if (col == this.size - 1) {
-                    sb.append(this.board[row][col] + " |");
+                    sb.append(this.board[row][col]).append(" |");
                 } else {
-                    sb.append(this.board[row][col] + " ");
+                    sb.append(this.board[row][col]).append(" ");
                 }
             }
             sb.append("\n");
         }
-        sb.append(divisionBar + "\n");
+        sb.append(divisionBar).append("\n");
 
         this.stringBoard = sb.toString();
 
@@ -260,7 +261,7 @@ public class SudokuBoard implements Cloneable {
             for (int j = 0; j < this.size; j++) {
                 if (this.board[i][j] == 0) {
 
-                    return new int[] { i, j };
+                    return new int[]{ i, j };
                 }
             }
         }
@@ -328,7 +329,7 @@ public class SudokuBoard implements Cloneable {
 
         cost = getCostOfRepeatedNumbersInColumn(board, cost);
 
-        if (isComplexBoard()) {
+        if(isComplexBoard()) {
             cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
 
         }
@@ -345,14 +346,14 @@ public class SudokuBoard implements Cloneable {
 
         cost = getCostOfEmptyCells(board, cost);
 
-        if (isComplexBoard()) {
+        if(isComplexBoard()) {
             cost = getCostOfRepeatedNumbersInSubGrid(board, cost);
         }
 
         return cost;
     }
 
-    private int getCostOfRepeatedNumbersInSubGrid(int[][] board, int cost) {
+    private int getCostOfRepeatedNumbersInSubGrid(int[][] board,int cost) {
         int boardSize = board.length;
         int regionSize = boardSize == 9 ? 3 : 2;
 
@@ -402,9 +403,9 @@ public class SudokuBoard implements Cloneable {
 
     private int getCostOfEmptyCells(int[][] board, int cost) {
         int boardSize = board.length;
-        for (int i = 0; i < boardSize; i++) {
+        for (int[] ints : board) {
             for (int j = 0; j < boardSize; j++) {
-                if (board[i][j] == 0) {
+                if (ints[j] == 0) {
                     cost += 1;
                 }
             }
@@ -436,7 +437,7 @@ public class SudokuBoard implements Cloneable {
 
         int value = random.nextInt(boardSize) + 1;
 
-        if (isValidMove(row, column, value)) {
+        if(isValidMove(row, column, value)) {
             newBoard[row][column] = value;
 
             return newBoard;
@@ -501,11 +502,11 @@ public class SudokuBoard implements Cloneable {
     }
 
     public CoordinateCell listOfCoordinatesOfCells() {
-        CoordinateCell coordinateCell = new CoordinateCell();
+        CoordinateCell coordinateCell= new CoordinateCell();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
-                if (board[i][j] != 0 || board[i][j] == 0) {
+                if(board[i][j] != 0 || board[i][j] == 0) {
                     Coordinate coordinate = new Coordinate();
                     coordinate.row = i;
                     coordinate.column = j;
@@ -517,11 +518,11 @@ public class SudokuBoard implements Cloneable {
     }
 
     public CoordinateCell listOfCoordinatesOfCellsThatAreEmpty() {
-        CoordinateCell coordinateCell = new CoordinateCell();
+        CoordinateCell coordinateCell= new CoordinateCell();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board.length; j++) {
-                if (board[i][j] == 0) {
+                if(board[i][j] == 0) {
                     Coordinate coordinate = new Coordinate();
                     coordinate.row = i;
                     coordinate.column = j;
