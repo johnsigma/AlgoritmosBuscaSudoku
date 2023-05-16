@@ -53,11 +53,13 @@ public class Main {
                     System.out.println("-----------Tabuleiro final------------");
                     sudokuResponse.getSteps().get(sudokuResponse.getSteps().size()-1).printBoard();
 
-                    System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
+                    System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos\n");
 
                     int randomNumber = random.nextInt();
 
-                    String outputPath = "saida/".concat("Busca-Profundidade-Iterativa-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+                    String fileOutputName = "Busca-Profundidade-Iterativa-" + LocalDateTime.now().toLocalDate() + randomNumber;
+                    String outputPath = "saida/".concat(fileOutputName).concat(".txt");
+                    System.out.println("\nFile output name: "+fileOutputName+"\n");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
@@ -95,7 +97,9 @@ public class Main {
 
                     int randomNumber = random.nextInt();
 
-                    String outputPath = "saida/".concat("Busca-Gulosa-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+                    String fileOutputName = "Busca-Gulosa-" + LocalDateTime.now().toLocalDate() + randomNumber;
+                    String outputPath = "saida/".concat(fileOutputName).concat(".txt");
+                    System.out.println("\nFile output name: "+fileOutputName+"\n");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
@@ -124,7 +128,9 @@ public class Main {
 
                     int randomNumber = random.nextInt();
 
-                    String outputPath = "saida/".concat("A-Estrela-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+                    String fileOutputName = "A-Estrela-"+ LocalDateTime.now().toLocalDate()+randomNumber;
+                    String outputPath = "saida/".concat(fileOutputName).concat(".txt");
+                    System.out.println("\nFile output name: "+fileOutputName+"\n");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
@@ -158,7 +164,9 @@ public class Main {
 
                     int randomNumber = random.nextInt();
 
-                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+                    String fileOutputName = "Subida-Encosta-"+ LocalDateTime.now().toLocalDate()+randomNumber;
+                    String outputPath = "saida/".concat(fileOutputName).concat(".txt");
+                    System.out.println("\nFile output name: "+fileOutputName+"\n");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
@@ -193,7 +201,9 @@ public class Main {
                     System.out.println("\nTempo execução: " + (timeElapsed / 1000d) + " segundos");
                     int randomNumber = random.nextInt();
 
-                    String outputPath = "saida/".concat("Têmpera-Simulada-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+                    String fileOutputName = "Têmpera-Simulada-"+ LocalDateTime.now().toLocalDate()+randomNumber;
+                    String outputPath = "saida/".concat(fileOutputName).concat(".txt");
+                    System.out.println("\nFile output name: "+fileOutputName+"\n");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
@@ -231,6 +241,7 @@ public class Main {
 
 
     private static void menu() {
+        System.out.println("----------------------------------------------------------------------\n");
         System.out.println("Resolução do jogo Sudoku com algoritmos de Inteligência Artificial\n");
         System.out.println("Escolha a opção que deseja resolver o jogo:\n");
         System.out.println("1- Busca em profundidade iterativa\n");
@@ -239,5 +250,6 @@ public class Main {
         System.out.println("4- Subida de Encosta com Movimentos Laterais\n");
         System.out.println("5- Têmpera Simulada\n");
         System.out.println("6- Sair\n");
+        System.out.println("----------------------------------------------------------------------\n");
     }
 }
