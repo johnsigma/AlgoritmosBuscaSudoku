@@ -81,7 +81,7 @@ public class Search {
     }
 
     public SudokuResponse greedySearch(SudokuBoard su) throws CloneNotSupportedException {
-        SudokuBoard selected_su = null;
+        SudokuBoard selected_su;
         su.setHeuristic();
 
         int numberOfSteps = 0;
@@ -149,7 +149,7 @@ public class Search {
     }
 
     public SudokuResponse greedySearch2(SudokuBoard su) throws CloneNotSupportedException {
-        SudokuBoard selected_su = null;
+        SudokuBoard selected_su;
         su.setHeuristic();
 
         int numberOfSteps = 0;
@@ -217,7 +217,7 @@ public class Search {
 
     public SudokuResponse depthLimitedSearch(int depth, SudokuBoard su, SudokuResponse sudokuResponse) throws CloneNotSupportedException {
 
-        SudokuBoard selectedSudokuBoard = null;
+        SudokuBoard selectedSudokuBoard;
 
         int numberOfSteps = 0;
 
@@ -280,7 +280,6 @@ public class Search {
     public SudokuResponse simulatedAnnealing(SudokuBoard sudokuBoard) {
         int currentCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
         int initialCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
-        int bestCost = currentCost;
         double temperature = SIMULATED_ANNEALING_INITIAL_TEMPERATURE;
 
         int visitedNodes = 0;
@@ -371,7 +370,7 @@ public class Search {
         int initialCost = sudokuBoard.calculateCostOfRepeatedNumbersInRowColumnOrSubGridOrEmptyCells(sudokuBoard.board);
 
         steps.add(firstBoardVersion);
-        int costOriginalBoard = 0, neighborCost;
+        int costOriginalBoard, neighborCost;
         while (!sudokuBoard.isSolution() && maxIterations < HILL_CLIMBING_MAX_ITERATIONS) {
 
             CoordinateCell coordinateEmptyCells = sudokuBoard.listOfCoordinatesOfCellsThatAreEmpty();
