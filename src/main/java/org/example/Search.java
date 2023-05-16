@@ -171,15 +171,15 @@ public class Search {
 
     }
 
-    public SudokuBoard aStarSearch(SudokuBoard initialBoard) throws CloneNotSupportedException {
+    public SudokuResponse aStarSearch(SudokuBoard initialBoard) throws CloneNotSupportedException {
 
         int numberOfSteps = 0;
 
-        // Inicialização do openSet e visitedNodes
-        PriorityQueue<SudokuBoard> openSet = new PriorityQueue<SudokuBoard>(
+        // Inicialização do openSet e exploredNodes
+        PriorityQueue<SudokuBoard> openSet = new PriorityQueue<>(
                 Comparator.comparingInt(SudokuBoard::getTotalCost));
 
-        Set<SudokuBoard> visitedNodes = new HashSet<>();
+        ArrayList<SudokuBoard> exploredNodes = new ArrayList<>();
 
         // Definir o custo inicial e heurística para o estado inicial
         initialBoard.setCostFunction();
@@ -187,6 +187,8 @@ public class Search {
 
         // Adicionar o estado inicial ao openSet
         openSet.add(initialBoard);
+
+        SudokuResponse sudokuResponse = new SudokuResponse();
 
         while (!openSet.isEmpty()) {
 
@@ -200,14 +202,10 @@ public class Search {
             if (currentBoard.isSolution()) {
 
                 System.out.println("Solução encontrada na profundidade: " + numberOfSteps + ". Explorando "
-                        + visitedNodes.size() + " nós.");
+                        + exploredNodes.size() + " nós.");
 
-                return currentBoard;
+                break;
             }
-
-            // Adicionar o estado atual ao visitedNodes
-            // if (!visitedNodes.contains(currentBoard))
-            // visitedNodes.add(currentBoard);
 
             // Gerar e avaliar estados vizinhos
             List<SudokuBoard> neighbors = currentBoard.extendBoard();
@@ -219,12 +217,9 @@ public class Search {
 
             if (neighbors.size() > 0) {
 
-                // if (!visitedNodes.contains(currentBoard))
-                // visitedNodes.add(currentBoard);
-
                 for (SudokuBoard neighbor : neighbors) {
                     // Verificar se o estado vizinho já foi explorado
-                    if (visitedNodes.contains(neighbor)) {
+                    if (exploredNodes.contains(neighbor)) {
                         continue;
                     }
 
@@ -236,16 +231,19 @@ public class Search {
 
                     if (!openSet.contains(neighbor) || newTotalCost < currentCost) {
                         openSet.add(neighbor);
-                        if (!visitedNodes.contains(currentBoard))
-                            visitedNodes.add(currentBoard);
+                        if (!exploredNodes.contains(currentBoard))
+                            exploredNodes.add(currentBoard);
                     }
                 }
             }
 
         }
-
+        sudokuResponse.setResolutionMethod("Busca A estrela de tamanho "+initialBoard.board.length+"x"+initialBoard.board.length);
+        sudokuResponse.setSteps(exploredNodes);
+        sudokuResponse.setQuantityExploredNodes(String.valueOf(exploredNodes.size()));
+        sudokuResponse.setComplexity(initialBoard.getSudokuBoardType().name());
         System.out.println("Solução não encontrada!");
-        return null; // Nenhuma solução encontrada
+        return sudokuResponse;
     }
 
     public SudokuResponse greedySearch2(SudokuBoard su) throws CloneNotSupportedException {

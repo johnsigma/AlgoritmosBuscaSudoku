@@ -103,7 +103,7 @@ public class Main {
                     FileHandler.writeToFile(outputPath, sudokuResponse);
                 }
                 case 3 -> {
-                    System.out.println("A*:");
+                    System.out.println("A Estrela (A*):");
                     type = chooseSudokuType(input);
                     System.out.println("Entre com o nome do arquivo do jogo sudoku:");
                     fileName = input.next();
@@ -113,9 +113,9 @@ public class Main {
                     sudokuBoard.printBoard();
                     start = System.currentTimeMillis();
 
-                    SudokuResponse sudokuResponse = new SudokuResponse();
+                    SudokuResponse sudokuResponse;
 
-                    //sudokuResponse = search.aStar(sudokuBoard); (implementar essa funcao))
+                    sudokuResponse = search.aStarSearch(sudokuBoard);
 
                     finish = System.currentTimeMillis();
                     timeElapsed = finish - start;
@@ -126,7 +126,7 @@ public class Main {
 
                     int randomNumber = random.nextInt();
 
-                    String outputPath = "saida/".concat("Subida-Encosta-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
+                    String outputPath = "saida/".concat("A-Estrela-"+ LocalDateTime.now().toLocalDate()+randomNumber).concat(".txt");
 
                     sudokuResponse.setSpentTime(String.valueOf(timeElapsed / 1000d));
                     FileHandler.writeToFile(outputPath, sudokuResponse);
