@@ -14,8 +14,6 @@ public class Main {
 
         Search search = new Search();
 
-        SudokuBoard sudokuBoardResult;
-
         long start, finish, timeElapsed;
 
         SudokuBoard sudokuBoard;

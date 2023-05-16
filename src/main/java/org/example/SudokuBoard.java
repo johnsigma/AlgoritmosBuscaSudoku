@@ -230,23 +230,23 @@ public class SudokuBoard implements Cloneable {
 
         for (int row = 0; row < this.size; row++) {
             if (row % Math.sqrt(this.size) == 0 && row != 0) {
-                sb.append(divisionBar+"\n");
+                sb.append(divisionBar).append("\n");
             }
             for (int col = 0; col < this.size; col++) {
                 if (col % Math.sqrt(this.size) == 0 && col != 0) {
                     sb.append("| ");
                 }
                 if(col == 0) {
-                    sb.append("| "+this.board[row][col] + " ");
+                    sb.append("| ").append(this.board[row][col]).append(" ");
                 } else if (col == this.size - 1) {
-                    sb.append(this.board[row][col] + " |");
+                    sb.append(this.board[row][col]).append(" |");
                 } else {
-                    sb.append(this.board[row][col] + " ");
+                    sb.append(this.board[row][col]).append(" ");
                 }
             }
             sb.append("\n");
         }
-        sb.append(divisionBar+"\n");
+        sb.append(divisionBar).append("\n");
 
         this.stringBoard = sb.toString();
 
@@ -400,9 +400,9 @@ public class SudokuBoard implements Cloneable {
 
     private int getCostOfEmptyCells(int[][] board, int cost) {
         int boardSize = board.length;
-        for (int i = 0; i < boardSize; i++) {
+        for (int[] ints : board) {
             for (int j = 0; j < boardSize; j++) {
-                if(board[i][j] == 0) {
+                if (ints[j] == 0) {
                     cost += 1;
                 }
             }
